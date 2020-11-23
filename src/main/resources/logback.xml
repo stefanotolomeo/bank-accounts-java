@@ -1,0 +1,15 @@
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[%-5level] %d{"yyyy-MM-dd HH:mm:ss,SSS"} - [%thread] - %logger.%M\(%L\) - %replace(%msg){'(\n)',' '} %replace(%ex){'(\n)','$1 ---> '}%nopex%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="org.springframework" level="INFO"/>
+    <logger name="org.apache.tomcat" level="INFO"/>
+
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>
