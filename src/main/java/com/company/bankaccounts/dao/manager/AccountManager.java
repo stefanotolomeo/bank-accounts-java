@@ -21,15 +21,32 @@ public class AccountManager extends AbstractManager implements IManager<Account>
 		this.CACHE_NAME = Constants.CACHE_ACCOUNT_NAME;
 	}
 
-
 	@Override
-	public String save(Account account) throws Exception {
-		return null;
+	public Account save(Account account) {
+		// TODO: validate account input
+		String nextId = String.valueOf(valueOperations.increment(Constants.INDEX_CACHE_ACCOUNT));
+		hashOperations.put(CACHE_NAME, nextId, account);
+		return findById(nextId);
 	}
 
 	@Override
 	public Account update(Account account) throws Exception {
-		return null;
+		// TODO: update only Name, Surname, PIN --- NO UPDATES for AMOUNT
+		Account cacheAcc = findById(account.getId());
+		if (cacheAcc == null) {
+			throw new ItemNotFoundException("Cannot Update: Account ID not found");
+		}
+
+		if(account.getAmount().compareTo(cacheAcc.getAmount()) != 0){
+			// ASSUMPTION: The only way to change the amount is with TRANSACTIONS. No manually operations is allowed
+			log.warn("Updating Amount is allowed only with TRANSACTION. No changes will be applied to the amount");
+			account.setAmount(cacheAcc.getAmount());
+		}
+
+		hashOperations.put(CACHE_NAME, account.getId(), account);
+		log.info("Updated Account={}", account);
+
+		return account;
 	}
 
 	@Override

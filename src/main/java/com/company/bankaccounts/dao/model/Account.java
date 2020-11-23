@@ -1,12 +1,14 @@
 package com.company.bankaccounts.dao.model;
 
+import java.math.BigDecimal;
+
 public class Account {
 
 	private String id;
 	private String name;
 	private String surname;
 	private String pin;
-	private String amount;	// in EUR
+	private BigDecimal amount;	// in EUR
 
 	public String getId() {
 		return id;
@@ -40,11 +42,11 @@ public class Account {
 		this.pin = pin;
 	}
 
-	public String getAmount() {
+	public BigDecimal getAmount() {
 		return amount;
 	}
 
-	public void setAmount(String amount) {
+	public void setAmount(BigDecimal amount) {
 		this.amount = amount;
 	}
 }

@@ -4,7 +4,7 @@ import java.util.Map;
 
 public interface IManager<T> {
 
-	String save(T item) throws Exception;
+	T save(T item) throws Exception;
 
 	T update(T item) throws Exception;
 

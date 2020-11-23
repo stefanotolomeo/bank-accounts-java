@@ -1,5 +1,6 @@
 package com.company.bankaccounts.dao.exceptions;
 
+import com.company.bankaccounts.dao.model.OperationType;
 
 public class FailedCRUDException extends Exception {
 
