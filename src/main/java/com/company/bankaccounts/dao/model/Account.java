@@ -1,14 +1,23 @@
 package com.company.bankaccounts.dao.model;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
-public class Account {
+public class Account  implements Serializable {
 
 	private String id;
 	private String name;
 	private String surname;
 	private String pin;
 	private BigDecimal amount;	// in EUR
+
+	public Account(String id, String name, String surname, String pin, BigDecimal amount) {
+		this.id = id;
+		this.name = name;
+		this.surname = surname;
+		this.pin = pin;
+		this.amount = amount;
+	}
 
 	public String getId() {
 		return id;
