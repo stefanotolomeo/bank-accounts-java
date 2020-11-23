@@ -5,12 +5,7 @@ import com.company.bankaccounts.config.DaoConfig;
 import com.company.bankaccounts.config.RedisConfig;
 import com.company.bankaccounts.dao.model.*;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.BDDMockito;
-import org.mockito.MockitoAnnotations;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.data.redis.core.HashOperations;
@@ -23,16 +18,8 @@ import java.util.Set;
 @ContextConfiguration(classes = { ITContext.class, RedisConfig.class, DaoConfig.class })
 @ExtendWith(SpringExtension.class)
 @JsonTest
-// @TestPropertySource(locations = "classpath:application-unit.yml")
 @ActiveProfiles("it")
-public abstract class BaseIT extends BDDMockito {
-
-	protected Logger log = LoggerFactory.getLogger(this.getClass());
-
-	@BeforeEach
-	public void init() {
-		MockitoAnnotations.initMocks(this);
-	}
+public abstract class BaseIT {
 
 	@Autowired
 	protected HashOperations<String, String, Account> accountHashOperations;
@@ -63,12 +50,10 @@ public abstract class BaseIT extends BDDMockito {
 	}
 
 	protected void makeAssertionsOnTransactions(AbstractTransaction expected, AbstractTransaction actual) throws Exception {
-		// Cannot know ID and Timestamp: no assertions for them
 		Assertions.assertEquals(expected.getTransactionType(), actual.getTransactionType());
 		Assertions.assertEquals(expected.getId(), actual.getId());
 		Assertions.assertEquals(expected.getAmount(), actual.getAmount());
 
-		// TODO
 		switch (actual.getTransactionType()) {
 		case WITHDRAW:
 			Assertions.assertEquals(((TransactionWithdraw) expected).getAccountId(), ((TransactionWithdraw) actual).getAccountId());
