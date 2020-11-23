@@ -1,12 +1,16 @@
 package com.company.bankaccounts.dao.model;
 
+import java.math.BigDecimal;
+
 public class TransactionTransfer extends AbstractTransaction {
 
 	private String fromAccountId;	// from account ID
 	private String toAccountId;		// to account ID
 
-	public TransactionTransfer() {
-		super(TransactionType.TRANSFER);
+	public TransactionTransfer(String id, BigDecimal amount, String fromAccountId, String toAccountId) {
+		super(TransactionType.TRANSFER, id, amount);
+		this.fromAccountId = fromAccountId;
+		this.toAccountId = toAccountId;
 	}
 
 	public String getFromAccountId() {

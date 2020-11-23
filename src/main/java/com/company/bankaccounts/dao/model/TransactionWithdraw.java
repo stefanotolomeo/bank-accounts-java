@@ -1,11 +1,14 @@
 package com.company.bankaccounts.dao.model;
 
+import java.math.BigDecimal;
+
 public class TransactionWithdraw extends AbstractTransaction {
 
 	private String accountId;	// from account ID
 
-	public TransactionWithdraw() {
-		super(TransactionType.WITHDRAW);
+	public TransactionWithdraw(String id, BigDecimal amount, String accountId) {
+		super(TransactionType.WITHDRAW, id, amount);
+		this.accountId = accountId;
 	}
 
 	public String getAccountId() {

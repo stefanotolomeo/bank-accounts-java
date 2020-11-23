@@ -1,7 +1,8 @@
-package com.company.bankaccounts.dao.manager;
+package com.company.bankaccounts.dao.logic;
 
 import com.company.bankaccounts.config.Constants;
 import com.company.bankaccounts.dao.exceptions.FailedCRUDException;
+import com.company.bankaccounts.dao.exceptions.InsufficientAmountException;
 import com.company.bankaccounts.dao.exceptions.ItemNotFoundException;
 import com.company.bankaccounts.dao.model.*;
 import org.slf4j.Logger;
@@ -19,7 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-// Used for execute TRANSACTIONAL operation between TRANSACTION and ACCOUNT
+// Used for execute TRANSACTIONAL operations between TRANSACTION and ACCOUNT
 @Service
 public class TransactionalExecutor {
 
@@ -35,7 +36,7 @@ public class TransactionalExecutor {
 	@Autowired
 	private RedisTemplate<String, Object> redisTemplate;
 
-	void saveWithdrawTransaction(TransactionWithdraw transactionWithdraw) throws Exception {
+	public void saveWithdrawTransaction(TransactionWithdraw transactionWithdraw) throws Exception {
 
 		Account acc = accountHashOperations.get(Constants.CACHE_ACCOUNT_NAME, transactionWithdraw.getAccountId());
 
@@ -46,13 +47,16 @@ public class TransactionalExecutor {
 
 		BigDecimal newAmount = acc.getAmount().subtract(transactionWithdraw.getAmount());
 
-		log.info("WITHDRAW Transaction: oldAmount={}, transactionAmount={}, newAmount={}", acc.getAmount(),
-				transactionWithdraw.getAmount(), newAmount);
+		if(newAmount.compareTo(BigDecimal.ZERO) < 0) {
+			throw new InsufficientAmountException("Not enough amount", acc.getAmount(), transactionWithdraw.getAmount());
+		}
+		log.info("WITHDRAW Transaction ALLOWED: oldAmount={}, transactionAmount={}, newAmount={}", acc.getAmount(), transactionWithdraw.getAmount(),
+				newAmount);
 		acc.setAmount(newAmount);
 		makeTransactionalInsert(transactionWithdraw, Collections.singletonList(acc));
 	}
 
-	void saveDepositTransaction(TransactionDeposit transactionDeposit) throws Exception {
+	public void saveDepositTransaction(TransactionDeposit transactionDeposit) throws Exception {
 
 		Account acc = accountHashOperations.get(Constants.CACHE_ACCOUNT_NAME, transactionDeposit.getAccountId());
 
@@ -70,7 +74,7 @@ public class TransactionalExecutor {
 		makeTransactionalInsert(transactionDeposit, Collections.singletonList(acc));
 	}
 
-	void saveTransferTransaction(TransactionTransfer transactionTransfer) throws Exception {
+	public void saveTransferTransaction(TransactionTransfer transactionTransfer) throws Exception {
 
 		Account fromAccount = accountHashOperations.get(Constants.CACHE_ACCOUNT_NAME, transactionTransfer.getFromAccountId());
 		Account toAccount = accountHashOperations.get(Constants.CACHE_ACCOUNT_NAME, transactionTransfer.getToAccountId());
@@ -80,8 +84,13 @@ public class TransactionalExecutor {
 					transactionTransfer.getFromAccountId(), transactionTransfer.getToAccountId());
 			throw new ItemNotFoundException(msg);
 		}
+
 		BigDecimal fromAcc_newAmount = fromAccount.getAmount().subtract(transactionTransfer.getAmount());
 		BigDecimal toAcc_newAmount = toAccount.getAmount().add(transactionTransfer.getAmount());
+
+		if(fromAcc_newAmount.compareTo(BigDecimal.ZERO) < 0) {
+			throw new InsufficientAmountException("Not enough amount", fromAccount.getAmount(), transactionTransfer.getAmount());
+		}
 
 		log.info("TRANSFER Transaction: Account_FROM has oldAmount={}, transactionAmount={}, newAmount={}; "
 						+ "Account_TO has oldAmount={}, transactionAmount={}, newAmount={};", fromAccount.getAmount(),

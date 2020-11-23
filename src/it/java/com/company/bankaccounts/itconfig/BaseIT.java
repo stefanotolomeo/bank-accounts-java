@@ -1,9 +1,9 @@
 package com.company.bankaccounts.itconfig;
 
 import com.company.bankaccounts.config.Constants;
+import com.company.bankaccounts.config.DaoConfig;
 import com.company.bankaccounts.config.RedisConfig;
-import com.company.bankaccounts.dao.model.AbstractTransaction;
-import com.company.bankaccounts.dao.model.Account;
+import com.company.bankaccounts.dao.model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +20,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Set;
 
-@ContextConfiguration(classes = { ITContext.class, RedisConfig.class })
+@ContextConfiguration(classes = { ITContext.class, RedisConfig.class, DaoConfig.class })
 @ExtendWith(SpringExtension.class)
 @JsonTest
 // @TestPropertySource(locations = "classpath:application-unit.yml")
@@ -64,17 +64,23 @@ public abstract class BaseIT extends BDDMockito {
 
 	protected void makeAssertionsOnTransactions(AbstractTransaction expected, AbstractTransaction actual) throws Exception {
 		// Cannot know ID and Timestamp: no assertions for them
-		Assertions.assertEquals(expected.getAmount(), actual.getAmount());
 		Assertions.assertEquals(expected.getTransactionType(), actual.getTransactionType());
+		Assertions.assertEquals(expected.getId(), actual.getId());
+		Assertions.assertEquals(expected.getAmount(), actual.getAmount());
 
 		// TODO
 		switch (actual.getTransactionType()) {
-		case TRANSFER:
-			// TransactionTransfer exp_1 = (Tra)
+		case WITHDRAW:
+			Assertions.assertEquals(((TransactionWithdraw) expected).getAccountId(), ((TransactionWithdraw) actual).getAccountId());
 			break;
 		case DEPOSIT:
+			Assertions.assertEquals(((TransactionDeposit) expected).getAccountId(), ((TransactionDeposit) actual).getAccountId());
 			break;
-		case WITHDRAW:
+		case TRANSFER:
+			TransactionTransfer castedExpected = (TransactionTransfer) expected;
+			TransactionTransfer castedActual = (TransactionTransfer) actual;
+			Assertions.assertEquals(castedExpected.getFromAccountId(), castedActual.getFromAccountId());
+			Assertions.assertEquals(castedExpected.getToAccountId(), castedActual.getToAccountId());
 			break;
 		default:
 			throw new Exception("Unrecognized TransactionType");

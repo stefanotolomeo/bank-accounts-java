@@ -1,16 +1,19 @@
 package com.company.bankaccounts.dao.model;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
-public abstract class AbstractTransaction {
+public abstract class AbstractTransaction implements Serializable {
 	private final TransactionType transactionType;
 
-	private String id;
+	protected String id;
 
-	private BigDecimal amount; // Amount in EUR
+	protected BigDecimal amount; // Amount in EUR
 
-	AbstractTransaction(TransactionType transactionType) {
+	public AbstractTransaction(TransactionType transactionType, String id, BigDecimal amount) {
 		this.transactionType = transactionType;
+		this.id = id;
+		this.amount = amount;
 	}
 
 	public TransactionType getTransactionType() {
