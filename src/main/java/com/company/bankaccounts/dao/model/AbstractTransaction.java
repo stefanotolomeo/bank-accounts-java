@@ -7,7 +7,6 @@ public abstract class AbstractTransaction implements Serializable {
 	private final TransactionType transactionType;
 
 	protected String id;
-
 	protected BigDecimal amount; // Amount in EUR
 
 	public AbstractTransaction(TransactionType transactionType, String id, BigDecimal amount) {

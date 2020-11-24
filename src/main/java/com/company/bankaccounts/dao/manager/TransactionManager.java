@@ -3,6 +3,7 @@ package com.company.bankaccounts.dao.manager;
 import com.company.bankaccounts.config.Constants;
 import com.company.bankaccounts.dao.exceptions.FailedCRUDException;
 import com.company.bankaccounts.dao.exceptions.InvalidInputException;
+import com.company.bankaccounts.dao.exceptions.ItemNotFoundException;
 import com.company.bankaccounts.dao.logic.TransactionalExecutor;
 import com.company.bankaccounts.dao.model.*;
 import com.google.common.base.Preconditions;
@@ -28,11 +29,12 @@ public class TransactionManager extends AbstractManager implements IManager<Abst
 		this.CACHE_NAME = Constants.CACHE_TRANSACTION_NAME;
 	}
 
+	// At this layer, the PIN has been checked yet
 	@Override
 	public AbstractTransaction save(AbstractTransaction item) throws Exception {
 
 		validateTransaction(item);
-		// TODO: Check PIN: put a layer at the top of this method
+
 		String nextTransactionId = String.valueOf(valueOperations.increment(Constants.INDEX_CACHE_ACCOUNT));
 		item.setId(nextTransactionId);
 
@@ -89,8 +91,17 @@ public class TransactionManager extends AbstractManager implements IManager<Abst
 	}
 
 	@Override
-	public AbstractTransaction findById(String id) {
-		return hashOperations.get(CACHE_NAME, id);
+	public AbstractTransaction findById(String id) throws Exception {
+		if(id == null || id.isEmpty()){
+			throw new InvalidInputException("Invalid Input: Null or empty");
+		}
+
+		AbstractTransaction foundTrans = hashOperations.get(CACHE_NAME, id);
+		if(foundTrans == null){
+			throw new ItemNotFoundException("No Transaction found for ID="+id);
+		}
+
+		return foundTrans;
 	}
 
 	@Override

@@ -71,7 +71,7 @@ class AccountManagerIT extends BaseIT {
 
 	@DisplayName("FindByID Test: retrieve an Account by ID")
 	@Test
-	void findBy_Test() {
+	void findBy_Test() throws Exception {
 
 		// (1) Empty map
 		Account res_1 = accountManager.findById(a1.getId());

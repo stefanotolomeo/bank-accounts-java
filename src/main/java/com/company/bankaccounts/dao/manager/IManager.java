@@ -1,5 +1,7 @@
 package com.company.bankaccounts.dao.manager;
 
+import com.company.bankaccounts.dao.exceptions.InvalidInputException;
+
 import java.util.Map;
 
 public interface IManager<T> {
@@ -8,7 +10,7 @@ public interface IManager<T> {
 
 	T update(T item) throws Exception;
 
-	T findById(String id);
+	T findById(String id) throws Exception;
 
 	Map<String, T> findAll();
 

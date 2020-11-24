@@ -25,7 +25,7 @@ public class AccountManager extends AbstractManager implements IManager<Account>
 	}
 
 	@Override
-	public Account save(Account account) throws InvalidInputException {
+	public Account save(Account account) throws Exception {
 
 		validateAccount(OperationType.INSERT, account);
 
@@ -77,8 +77,17 @@ public class AccountManager extends AbstractManager implements IManager<Account>
 	}
 
 	@Override
-	public Account findById(String id) {
-		return hashOperations.get(CACHE_NAME, id);
+	public Account findById(String id) throws Exception {
+		if(id == null || id.isEmpty()){
+			throw new InvalidInputException("Invalid Input: Null or empty");
+		}
+
+		Account foundAcc = hashOperations.get(CACHE_NAME, id);
+		if(foundAcc == null){
+			throw new ItemNotFoundException("No Account found for ID="+id);
+		}
+
+		return foundAcc;
 	}
 
 	@Override
