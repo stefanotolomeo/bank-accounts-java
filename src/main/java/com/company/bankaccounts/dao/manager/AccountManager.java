@@ -8,12 +8,12 @@ import com.company.bankaccounts.dao.model.OperationType;
 import com.google.common.base.Preconditions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.HashOperations;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
 import java.util.Map;
 
-@Service
+@Repository
 public class AccountManager extends AbstractManager implements IManager<Account> {
 
 	@Autowired
@@ -78,7 +78,7 @@ public class AccountManager extends AbstractManager implements IManager<Account>
 
 	@Override
 	public Account findById(String id) throws Exception {
-		if(id == null || id.isEmpty()){
+		if(id == null || id.trim().length() == 0){
 			throw new InvalidInputException("Invalid Input: Null or empty");
 		}
 

@@ -28,4 +28,10 @@ public class TransactionTransfer extends AbstractTransaction {
 	public void setToAccountId(String toAccountId) {
 		this.toAccountId = toAccountId;
 	}
+
+	@Override
+	public String toString() {
+		return "TransactionTransfer{" + "fromAccountId='" + fromAccountId + '\'' + ", toAccountId='" + toAccountId + '\'' + ", id='" + id
+				+ '\'' + ", amount=" + amount + '}';
+	}
 }

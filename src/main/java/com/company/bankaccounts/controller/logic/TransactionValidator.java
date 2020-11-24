@@ -1,6 +1,5 @@
 package com.company.bankaccounts.controller.logic;
 
-import com.company.bankaccounts.controller.dto.AccountDTO;
 import com.company.bankaccounts.controller.dto.DepositTransactionDTO;
 import com.company.bankaccounts.controller.dto.TransferTransactionDTO;
 import com.company.bankaccounts.controller.dto.WithdrawTransactionDTO;

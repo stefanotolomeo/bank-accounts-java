@@ -18,4 +18,9 @@ public class TransactionWithdraw extends AbstractTransaction {
 	public void setAccountId(String accountId) {
 		this.accountId = accountId;
 	}
+
+	@Override
+	public String toString() {
+		return "TransactionWithdraw{" + "accountId='" + accountId + '\'' + ", id='" + id + '\'' + ", amount=" + amount + '}';
+	}
 }

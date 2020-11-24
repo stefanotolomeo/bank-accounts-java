@@ -53,7 +53,8 @@ public class AccountController {
 			return ResponseEntity.status(HttpStatus.OK).body(savedAccount.getId());
 		} catch (InvalidInputException e) {
 			log.error("Bad input for request", e);
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+			String msg = "Bad input: " + e.getMessage();
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
 		} catch (Exception e) {
 			log.error("Unexpected error", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -75,7 +76,7 @@ public class AccountController {
 				));
 			// @formatter:on
 			log.debug("Found {} accounts. Returning..", res.size());
-			return ResponseEntity.status(HttpStatus.OK).body(null);
+			return ResponseEntity.status(HttpStatus.OK).body(res);
 		} catch (Exception e) {
 			log.error("Unexpected error", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -90,17 +91,17 @@ public class AccountController {
 		try {
 			Account foundAcc = accountManager.findById(id);
 
-			log.debug("Converting into DTO..");
+			log.debug("Found account. Converting into DTO..");
 			AccountDTO accDTO = converter.convertToDTO(foundAcc);
 			log.debug("Converted DTO-Account is={}. Returning..", accDTO);
 
 			return ResponseEntity.status(HttpStatus.OK).body(accDTO);
+		} catch (ItemNotFoundException e) {
+			log.error("No element found", e);
+			return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 		} catch (InvalidInputException e) {
 			log.error("Bad input for request", e);
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-		} catch (ItemNotFoundException e) {
-			log.error("No element found", e);
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		} catch (Exception e) {
 			log.error("Unexpected error", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -121,7 +122,8 @@ public class AccountController {
 			return ResponseEntity.status(HttpStatus.OK).body(id);
 		} catch (ItemNotFoundException e) {
 			log.error("No element found", e);
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+			String msg = "No element found: " + e.getMessage();
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
 		} catch (Exception e) {
 			log.error("Unexpected error", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -129,7 +131,7 @@ public class AccountController {
 	}
 
 	@PutMapping
-	public ResponseEntity<AccountDTO> update(
+	public ResponseEntity<String> update(
 			@RequestBody
 			final AccountDTO accountDTO, String id) {
 
@@ -147,17 +149,17 @@ public class AccountController {
 			// Note: The following accounts' amounts could be different
 			Account updated = accountManager.update(acc);
 
-			log.debug("Successfully updated Account with ID = {}. Converting into DTO", updated.getId());
-			AccountDTO accDTO = converter.convertToDTO(updated);
-			log.debug("Converted DTO-Account is={}. Returning..", acc);
+			log.debug("Successfully updated Account with ID = {}.", updated.getId());
 
-			return ResponseEntity.status(HttpStatus.OK).body(accDTO);
+			return ResponseEntity.status(HttpStatus.OK).body(updated.getId());
 		} catch (InvalidInputException e) {
 			log.error("Bad input for request", e);
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+			String msg = "Bad input: " + e.getMessage();
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
 		} catch (ItemNotFoundException e) {
 			log.error("No element found", e);
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+			String msg = "No element found: " + e.getMessage();
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
 		} catch (Exception e) {
 			log.error("Unexpected error", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

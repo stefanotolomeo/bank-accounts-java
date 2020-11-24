@@ -1,18 +1,18 @@
 package com.company.bankaccounts.controller.dto;
 
-import net.minidev.json.annotate.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.math.BigDecimal;
 
 public class AccountDTO {
 
-	@JsonIgnore
 	private String id;
 
 	private String name;
 	private String surname;
 	private String pin;
-	private BigDecimal amount;	// in EUR
+	private BigDecimal amount;    // in EUR
 
 	public AccountDTO(String id, String name, String surname, String pin, BigDecimal amount) {
 		this.id = id;
@@ -22,10 +22,14 @@ public class AccountDTO {
 		this.amount = amount;
 	}
 
+	@JsonIgnore
+	@JsonProperty(value = "id")
 	public String getId() {
 		return id;
 	}
 
+	@JsonIgnore
+	@JsonProperty(value = "id")
 	public void setId(String id) {
 		this.id = id;
 	}
@@ -60,5 +64,11 @@ public class AccountDTO {
 
 	public void setAmount(BigDecimal amount) {
 		this.amount = amount;
+	}
+
+	@Override
+	public String toString() {
+		return "AccountDTO{" + "id='" + id + '\'' + ", name='" + name + '\'' + ", surname='" + surname + '\'' + ", pin='" + pin + '\''
+				+ ", amount=" + amount + '}';
 	}
 }

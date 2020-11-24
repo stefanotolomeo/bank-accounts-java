@@ -58,4 +58,10 @@ public class Account  implements Serializable {
 	public void setAmount(BigDecimal amount) {
 		this.amount = amount;
 	}
+
+	@Override
+	public String toString() {
+		return "Account{" + "id='" + id + '\'' + ", name='" + name + '\'' + ", surname='" + surname + '\'' + ", pin='" + pin + '\''
+				+ ", amount=" + amount + '}';
+	}
 }

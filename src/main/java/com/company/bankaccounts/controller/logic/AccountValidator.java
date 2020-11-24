@@ -3,9 +3,11 @@ package com.company.bankaccounts.controller.logic;
 import com.company.bankaccounts.controller.dto.AccountDTO;
 import com.company.bankaccounts.dao.exceptions.InvalidInputException;
 import com.google.common.base.Preconditions;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
+@Service
 public class AccountValidator {
 
 	// Used fof POST
@@ -36,6 +38,7 @@ public class AccountValidator {
 		Preconditions.checkArgument(accDTO.getName() != null && !accDTO.getName().isEmpty(), "Null or Empty Name");
 		Preconditions.checkArgument(accDTO.getSurname() != null && !accDTO.getSurname().isEmpty(), "Null or Empty Surname");
 		Preconditions.checkArgument(accDTO.getPin() != null && !accDTO.getPin().isEmpty(), "Null or Empty Pin");
+		Preconditions.checkArgument(accDTO.getPin().length() == 4, "Invalid Pin: only 4 digits allowed");
 		Preconditions.checkNotNull(accDTO.getAmount(), "Null Amount");
 		Preconditions.checkArgument(accDTO.getAmount().compareTo(BigDecimal.ZERO) > 0, "Not Positive Amount");
 	}

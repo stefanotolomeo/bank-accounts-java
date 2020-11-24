@@ -9,13 +9,13 @@ import com.company.bankaccounts.dao.model.*;
 import com.google.common.base.Preconditions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.HashOperations;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.util.Map;
 
-@Service
+@Repository
 public class TransactionManager extends AbstractManager implements IManager<AbstractTransaction> {
 
 	@Autowired
@@ -71,10 +71,10 @@ public class TransactionManager extends AbstractManager implements IManager<Abst
 				Preconditions.checkArgument(deposit.getAccountId() != null && !deposit.getAccountId().isEmpty(), "Null or Empty AccountID");
 			} else if (transaction.getTransactionType() == TransactionType.TRANSFER) {
 				TransactionTransfer transfer = (TransactionTransfer) transaction;
-				Preconditions.checkArgument(
-						transfer.getFromAccountId() != null && !transfer.getFromAccountId().isEmpty(), "Null or Empty From-AccountID");
-				Preconditions.checkArgument(
-						transfer.getToAccountId() != null && !transfer.getToAccountId().isEmpty(), "Null or Empty To-AccountID");
+				Preconditions.checkArgument(transfer.getFromAccountId() != null && !transfer.getFromAccountId().isEmpty(),
+						"Null or Empty From-AccountID");
+				Preconditions.checkArgument(transfer.getToAccountId() != null && !transfer.getToAccountId().isEmpty(),
+						"Null or Empty To-AccountID");
 			} else {
 				throw new Exception("Invalid TransactionType");
 			}
@@ -92,13 +92,13 @@ public class TransactionManager extends AbstractManager implements IManager<Abst
 
 	@Override
 	public AbstractTransaction findById(String id) throws Exception {
-		if(id == null || id.isEmpty()){
+		if (id == null || id.isEmpty()) {
 			throw new InvalidInputException("Invalid Input: Null or empty");
 		}
 
 		AbstractTransaction foundTrans = hashOperations.get(CACHE_NAME, id);
-		if(foundTrans == null){
-			throw new ItemNotFoundException("No Transaction found for ID="+id);
+		if (foundTrans == null) {
+			throw new ItemNotFoundException("No Transaction found for ID=" + id);
 		}
 
 		return foundTrans;

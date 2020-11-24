@@ -71,7 +71,7 @@ public class TransactionalExecutor {
 				newAmount);
 
 		acc.setAmount(newAmount);
-		makeTransactionalInsert(transactionDeposit, Collections.singletonList(acc));
+		makeTransactionalInsertDep(transactionDeposit, Collections.singletonList(acc));
 	}
 
 	public void saveTransferTransaction(TransactionTransfer transactionTransfer) throws Exception {
@@ -112,6 +112,35 @@ public class TransactionalExecutor {
 
 				// (2) Execute the operations:
 				// (2.1) Save the transaction
+				operations.opsForHash().put(Constants.CACHE_TRANSACTION_NAME, newTransaction.getId(), newTransaction);
+				// (2.2) Decrease the amount from the involved accounts
+				for (Account a : updatedAccountList) {
+					operations.opsForHash().put(Constants.CACHE_ACCOUNT_NAME, a.getId(), a);
+				}
+
+				// (3) Execute operations
+				return operations.exec();
+			}
+		});
+
+		if (txResults == null || txResults.size() == 0) {
+			String msg = String.format("Cannot save Item: error while inserting into cache. TxResults is %s", txResults);
+			throw new FailedCRUDException(OperationType.INSERT, msg);
+		}
+	}
+
+	private void makeTransactionalInsertDep(TransactionDeposit newTransaction, List<Account> updatedAccountList) throws FailedCRUDException {
+
+		//execute a Transactional operation: This will contain the results of all operations in the transaction
+		List<Object> txResults = redisTemplate.execute(new SessionCallback<List<Object>>() {
+			public List<Object> execute(RedisOperations operations) throws DataAccessException {
+
+				// (1) Start Transactional operation
+				operations.multi();
+
+				// (2) Execute the operations:
+				// (2.1) Save the transaction
+				log.info("*** PUTTING {}", newTransaction);
 				operations.opsForHash().put(Constants.CACHE_TRANSACTION_NAME, newTransaction.getId(), newTransaction);
 				// (2.2) Decrease the amount from the involved accounts
 				for (Account a : updatedAccountList) {

@@ -1,12 +1,16 @@
 package com.company.bankaccounts.controller.logic;
 
 import com.company.bankaccounts.controller.dto.DepositTransactionDTO;
+import com.company.bankaccounts.controller.dto.TransactionDTO;
 import com.company.bankaccounts.controller.dto.TransferTransactionDTO;
 import com.company.bankaccounts.controller.dto.WithdrawTransactionDTO;
+import com.company.bankaccounts.dao.model.AbstractTransaction;
 import com.company.bankaccounts.dao.model.TransactionDeposit;
 import com.company.bankaccounts.dao.model.TransactionTransfer;
 import com.company.bankaccounts.dao.model.TransactionWithdraw;
+import org.springframework.stereotype.Service;
 
+@Service
 public class TransactionConverter {
 
 	public TransactionWithdraw convertToInternalModel(WithdrawTransactionDTO transDTO) {
@@ -21,18 +25,21 @@ public class TransactionConverter {
 		return new TransactionTransfer(null, transDTO.getAmount(), transDTO.getFromAccountId(), transDTO.getToAccountId());
 	}
 
-	public WithdrawTransactionDTO convertToDTO(TransactionWithdraw withdraw) {
-		// TODO
-		return null;
-	}
+	public TransactionDTO convertToDTO(AbstractTransaction t) {
 
-	public DepositTransactionDTO convertToDTO(TransactionDeposit deposit) {
-		// TODO
-		return null;
-	}
-
-	public TransferTransactionDTO convertToDTO(TransactionTransfer transfer) {
-		// TODO
-		return null;
+		switch (t.getTransactionType()) {
+		case WITHDRAW:
+			TransactionWithdraw withdraw = (TransactionWithdraw) t;
+			return new WithdrawTransactionDTO(withdraw.getId(), withdraw.getAmount(), withdraw.getAccountId());
+		case DEPOSIT:
+			TransactionDeposit deposit = (TransactionDeposit) t;
+			return new DepositTransactionDTO(deposit.getId(), deposit.getAmount(), deposit.getAccountId());
+		case TRANSFER:
+			TransactionTransfer transfer = (TransactionTransfer) t;
+			return new TransferTransactionDTO(transfer.getId(), transfer.getAmount(), transfer.getFromAccountId(),
+					transfer.getToAccountId());
+		default:
+			throw new RuntimeException("Unrecognized TransactionType");
+		}
 	}
 }
