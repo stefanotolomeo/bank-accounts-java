@@ -4,19 +4,11 @@ import java.math.BigDecimal;
 
 public class TransactionDeposit extends AbstractTransaction {
 
-	private String accountId;	// beneficiary account ID
+	private static final long serialVersionUID = 2035470831015184493L;
 
+	// Account is the beneficiary account ID
 	public TransactionDeposit(String id, BigDecimal amount, String accountId) {
-		super(TransactionType.DEPOSIT, id, amount);
-		this.accountId = accountId;
-	}
-
-	public String getAccountId() {
-		return accountId;
-	}
-
-	public void setAccountId(String accountId) {
-		this.accountId = accountId;
+		super(TransactionType.DEPOSIT, id, amount, accountId);
 	}
 
 	@Override

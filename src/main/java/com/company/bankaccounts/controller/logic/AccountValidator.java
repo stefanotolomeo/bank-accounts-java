@@ -1,7 +1,7 @@
 package com.company.bankaccounts.controller.logic;
 
 import com.company.bankaccounts.controller.dto.AccountDTO;
-import com.company.bankaccounts.dao.exceptions.InvalidInputException;
+import com.company.bankaccounts.exceptions.InvalidInputException;
 import com.google.common.base.Preconditions;
 import org.springframework.stereotype.Service;
 

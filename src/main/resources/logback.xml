@@ -7,7 +7,11 @@
     </appender>
 
     <logger name="org.springframework" level="INFO"/>
-    <logger name="org.apache.tomcat" level="INFO"/>
+    <logger name="org.apache" level="INFO"/>
+    <logger name="io.netty" level="INFO"/>
+    <logger name="io.lettuce" level="INFO"/>
+
+    <logger name="springfox" level="WARN"/>
 
     <root level="DEBUG">
         <appender-ref ref="STDOUT" />

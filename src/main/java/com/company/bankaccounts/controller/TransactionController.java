@@ -6,12 +6,14 @@ import com.company.bankaccounts.controller.dto.TransferTransactionDTO;
 import com.company.bankaccounts.controller.dto.WithdrawTransactionDTO;
 import com.company.bankaccounts.controller.logic.TransactionConverter;
 import com.company.bankaccounts.controller.logic.TransactionValidator;
-import com.company.bankaccounts.dao.exceptions.InsufficientAmountException;
-import com.company.bankaccounts.dao.exceptions.InvalidInputException;
-import com.company.bankaccounts.dao.exceptions.ItemNotFoundException;
 import com.company.bankaccounts.dao.manager.TransactionManager;
 import com.company.bankaccounts.dao.model.AbstractTransaction;
+import com.company.bankaccounts.dao.model.TransactionTransfer;
+import com.company.bankaccounts.dao.model.TransactionType;
 import com.company.bankaccounts.dao.model.TransactionWithdraw;
+import com.company.bankaccounts.exceptions.InsufficientAmountException;
+import com.company.bankaccounts.exceptions.InvalidInputException;
+import com.company.bankaccounts.exceptions.ItemNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -49,6 +54,30 @@ public class TransactionController {
 						Map.Entry::getKey,
 						entry -> converter.convertToDTO(entry.getValue())
 				));
+			// @formatter:on
+			log.debug("Found {} transactions. Returning..", res.size());
+			return ResponseEntity.status(HttpStatus.OK).body(res);
+		} catch (Exception e) {
+			log.error("Unexpected error", e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+
+	@GetMapping("/allByAccount/{id}")
+	public ResponseEntity<List<TransactionDTO>> findAllByAccountId(
+			@PathVariable("id")
+			final String id) {
+		log.debug("Getting all Transactions for Account={}", id);
+		try {
+			// @formatter:off
+			List<TransactionDTO> res = transactionManager.findAll()
+					.values()
+					.stream()
+					.filter(t -> t.getAccountId().equals(id) ||
+							(t.getTransactionType()==TransactionType.TRANSFER && ((TransactionTransfer)t).getToAccountId().equals(id)))
+					.map(t -> converter.convertToDTO(t))
+					.sorted(Comparator.comparingInt(o -> Integer.parseInt(o.getId())))
+					.collect(Collectors.toList());
 			// @formatter:on
 			log.debug("Found {} transactions. Returning..", res.size());
 			return ResponseEntity.status(HttpStatus.OK).body(res);
@@ -171,6 +200,11 @@ public class TransactionController {
 			log.debug("Deposit-Transaction executed successfully: {}", savedTrans);
 
 			return ResponseEntity.status(HttpStatus.OK).body(savedTrans.getId());
+		} catch (InsufficientAmountException e) {
+			log.error("Operation not allowed due to insufficient amount", e);
+			String msg = String.format("Operation not allowed: %s.  Available:%s, Requested=%s", e.getMessage(), e.getAvailableFunds(),
+					e.getRequestedFunds());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
 		} catch (InvalidInputException | ItemNotFoundException e) {
 			log.error("Bad input for request", e);
 			String msg = "Bad input: " + e.getMessage();

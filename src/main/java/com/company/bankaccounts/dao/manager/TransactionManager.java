@@ -1,9 +1,9 @@
 package com.company.bankaccounts.dao.manager;
 
 import com.company.bankaccounts.config.Constants;
-import com.company.bankaccounts.dao.exceptions.FailedCRUDException;
-import com.company.bankaccounts.dao.exceptions.InvalidInputException;
-import com.company.bankaccounts.dao.exceptions.ItemNotFoundException;
+import com.company.bankaccounts.exceptions.FailedCRUDException;
+import com.company.bankaccounts.exceptions.InvalidInputException;
+import com.company.bankaccounts.exceptions.ItemNotFoundException;
 import com.company.bankaccounts.dao.logic.TransactionalExecutor;
 import com.company.bankaccounts.dao.model.*;
 import com.google.common.base.Preconditions;
@@ -71,7 +71,7 @@ public class TransactionManager extends AbstractManager implements IManager<Abst
 				Preconditions.checkArgument(deposit.getAccountId() != null && !deposit.getAccountId().isEmpty(), "Null or Empty AccountID");
 			} else if (transaction.getTransactionType() == TransactionType.TRANSFER) {
 				TransactionTransfer transfer = (TransactionTransfer) transaction;
-				Preconditions.checkArgument(transfer.getFromAccountId() != null && !transfer.getFromAccountId().isEmpty(),
+				Preconditions.checkArgument(transfer.getAccountId() != null && !transfer.getAccountId().isEmpty(),
 						"Null or Empty From-AccountID");
 				Preconditions.checkArgument(transfer.getToAccountId() != null && !transfer.getToAccountId().isEmpty(),
 						"Null or Empty To-AccountID");

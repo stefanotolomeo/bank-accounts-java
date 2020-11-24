@@ -1,9 +1,10 @@
 package com.company.bankaccounts.dao.logic;
 
 import com.company.bankaccounts.config.Constants;
-import com.company.bankaccounts.dao.exceptions.FailedCRUDException;
-import com.company.bankaccounts.dao.exceptions.InsufficientAmountException;
-import com.company.bankaccounts.dao.exceptions.ItemNotFoundException;
+import com.company.bankaccounts.exceptions.FailedCRUDException;
+import com.company.bankaccounts.exceptions.InsufficientAmountException;
+import com.company.bankaccounts.exceptions.InvalidInputException;
+import com.company.bankaccounts.exceptions.ItemNotFoundException;
 import com.company.bankaccounts.dao.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,17 +72,21 @@ public class TransactionalExecutor {
 				newAmount);
 
 		acc.setAmount(newAmount);
-		makeTransactionalInsertDep(transactionDeposit, Collections.singletonList(acc));
+		makeTransactionalInsert(transactionDeposit, Collections.singletonList(acc));
 	}
 
 	public void saveTransferTransaction(TransactionTransfer transactionTransfer) throws Exception {
 
-		Account fromAccount = accountHashOperations.get(Constants.CACHE_ACCOUNT_NAME, transactionTransfer.getFromAccountId());
+		if(transactionTransfer.getAccountId().equals(transactionTransfer.getToAccountId())){
+			throw new InvalidInputException("Same account, cannot move funds on the same account");
+		}
+
+		Account fromAccount = accountHashOperations.get(Constants.CACHE_ACCOUNT_NAME, transactionTransfer.getAccountId());
 		Account toAccount = accountHashOperations.get(Constants.CACHE_ACCOUNT_NAME, transactionTransfer.getToAccountId());
 
 		if (fromAccount == null || toAccount == null) {
 			String msg = String.format("Cannot save TRANSFER Transaction: FromAccountID=%s or ToAccountId=%s not found",
-					transactionTransfer.getFromAccountId(), transactionTransfer.getToAccountId());
+					transactionTransfer.getAccountId(), transactionTransfer.getToAccountId());
 			throw new ItemNotFoundException(msg);
 		}
 
@@ -112,35 +117,6 @@ public class TransactionalExecutor {
 
 				// (2) Execute the operations:
 				// (2.1) Save the transaction
-				operations.opsForHash().put(Constants.CACHE_TRANSACTION_NAME, newTransaction.getId(), newTransaction);
-				// (2.2) Decrease the amount from the involved accounts
-				for (Account a : updatedAccountList) {
-					operations.opsForHash().put(Constants.CACHE_ACCOUNT_NAME, a.getId(), a);
-				}
-
-				// (3) Execute operations
-				return operations.exec();
-			}
-		});
-
-		if (txResults == null || txResults.size() == 0) {
-			String msg = String.format("Cannot save Item: error while inserting into cache. TxResults is %s", txResults);
-			throw new FailedCRUDException(OperationType.INSERT, msg);
-		}
-	}
-
-	private void makeTransactionalInsertDep(TransactionDeposit newTransaction, List<Account> updatedAccountList) throws FailedCRUDException {
-
-		//execute a Transactional operation: This will contain the results of all operations in the transaction
-		List<Object> txResults = redisTemplate.execute(new SessionCallback<List<Object>>() {
-			public List<Object> execute(RedisOperations operations) throws DataAccessException {
-
-				// (1) Start Transactional operation
-				operations.multi();
-
-				// (2) Execute the operations:
-				// (2.1) Save the transaction
-				log.info("*** PUTTING {}", newTransaction);
 				operations.opsForHash().put(Constants.CACHE_TRANSACTION_NAME, newTransaction.getId(), newTransaction);
 				// (2.2) Decrease the amount from the involved accounts
 				for (Account a : updatedAccountList) {

@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 
 public class AccountDTO {
 
+	// TODO: delete id, it is always skipped
 	private String id;
 
 	private String name;
@@ -21,6 +22,7 @@ public class AccountDTO {
 		this.pin = pin;
 		this.amount = amount;
 	}
+
 
 	@JsonIgnore
 	@JsonProperty(value = "id")

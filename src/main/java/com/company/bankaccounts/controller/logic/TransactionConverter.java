@@ -36,7 +36,7 @@ public class TransactionConverter {
 			return new DepositTransactionDTO(deposit.getId(), deposit.getAmount(), deposit.getAccountId());
 		case TRANSFER:
 			TransactionTransfer transfer = (TransactionTransfer) t;
-			return new TransferTransactionDTO(transfer.getId(), transfer.getAmount(), transfer.getFromAccountId(),
+			return new TransferTransactionDTO(transfer.getId(), transfer.getAmount(), transfer.getAccountId(),
 					transfer.getToAccountId());
 		default:
 			throw new RuntimeException("Unrecognized TransactionType");

@@ -1,4 +1,4 @@
-package com.company.bankaccounts.dao.exceptions;
+package com.company.bankaccounts.exceptions;
 
 import java.math.BigDecimal;
 

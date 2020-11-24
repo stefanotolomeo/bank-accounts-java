@@ -4,19 +4,11 @@ import java.math.BigDecimal;
 
 public class TransactionWithdraw extends AbstractTransaction {
 
-	private String accountId;	// from account ID
+	private static final long serialVersionUID = 7239752053177850056L;
 
+	// Account is the source account ID
 	public TransactionWithdraw(String id, BigDecimal amount, String accountId) {
-		super(TransactionType.WITHDRAW, id, amount);
-		this.accountId = accountId;
-	}
-
-	public String getAccountId() {
-		return accountId;
-	}
-
-	public void setAccountId(String accountId) {
-		this.accountId = accountId;
+		super(TransactionType.WITHDRAW, id, amount, accountId);
 	}
 
 	@Override

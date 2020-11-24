@@ -3,9 +3,9 @@ package com.company.bankaccounts.controller.logic;
 import com.company.bankaccounts.controller.dto.DepositTransactionDTO;
 import com.company.bankaccounts.controller.dto.TransferTransactionDTO;
 import com.company.bankaccounts.controller.dto.WithdrawTransactionDTO;
-import com.company.bankaccounts.dao.exceptions.InvalidInputException;
+import com.company.bankaccounts.exceptions.InvalidInputException;
 import com.company.bankaccounts.dao.manager.AccountManager;
-import com.company.bankaccounts.dao.model.*;
+import com.company.bankaccounts.dao.model.Account;
 import com.google.common.base.Preconditions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,15 +49,16 @@ public class TransactionValidator {
 			Preconditions.checkNotNull(transDTO, "Null Transaction");
 			Preconditions.checkNotNull(transDTO.getAmount(), "Null Amount");
 			Preconditions.checkArgument(transDTO.getAmount().compareTo(BigDecimal.ZERO) > 0, "Not Positive Amount");
-			Preconditions.checkArgument(
-					transDTO.getFromAccountId() != null && !transDTO.getFromAccountId().isEmpty(), "Null or Empty From-AccountID");
-			Preconditions.checkArgument(
-					transDTO.getToAccountId() != null && !transDTO.getToAccountId().isEmpty(), "Null or Empty To-AccountID");
+			Preconditions.checkArgument(transDTO.getFromAccountId() != null && !transDTO.getFromAccountId().isEmpty(),
+					"Null or Empty From-AccountID");
+			Preconditions
+					.checkArgument(transDTO.getToAccountId() != null && !transDTO.getToAccountId().isEmpty(), "Null or Empty To-AccountID");
+			Preconditions.checkArgument(!transDTO.getFromAccountId().equals(transDTO.getToAccountId()),
+					"Source and Destination account cannot be the same");
 		} catch (Exception e) {
 			throw new InvalidInputException("Invalid Transaction: " + e.getMessage());
 		}
 	}
-
 
 	public void checkPin(String accountId, String pin) throws Exception {
 		Account acc = accountManager.findById(accountId);

@@ -1,7 +1,5 @@
 package com.company.bankaccounts.dao.manager;
 
-import com.company.bankaccounts.dao.exceptions.InvalidInputException;
-
 import java.util.Map;
 
 public interface IManager<T> {

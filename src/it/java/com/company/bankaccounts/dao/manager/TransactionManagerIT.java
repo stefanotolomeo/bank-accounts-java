@@ -1,10 +1,10 @@
 package com.company.bankaccounts.dao.manager;
 
 import com.company.bankaccounts.config.Constants;
-import com.company.bankaccounts.dao.exceptions.FailedCRUDException;
-import com.company.bankaccounts.dao.exceptions.InsufficientAmountException;
-import com.company.bankaccounts.dao.exceptions.InvalidInputException;
-import com.company.bankaccounts.dao.exceptions.ItemNotFoundException;
+import com.company.bankaccounts.exceptions.FailedCRUDException;
+import com.company.bankaccounts.exceptions.InsufficientAmountException;
+import com.company.bankaccounts.exceptions.InvalidInputException;
+import com.company.bankaccounts.exceptions.ItemNotFoundException;
 import com.company.bankaccounts.dao.model.*;
 import com.company.bankaccounts.itconfig.BaseIT;
 import org.junit.jupiter.api.*;
@@ -194,7 +194,7 @@ class TransactionManagerIT extends BaseIT {
 		Account a1 = new Account(null, "name_1", "surname_1", "12345", BigDecimal.valueOf(1000));
 		accountManager.save(a1);
 
-		t1.setFromAccountId(a1.getId());	// Save the REAL AccountID for From-AccountID
+		t1.setAccountId(a1.getId());	// Save the REAL AccountID for From-AccountID
 		ItemNotFoundException e2 = Assertions.assertThrows(ItemNotFoundException.class, () -> transactionManager.save(t1));
 		Assertions.assertEquals("Cannot save TRANSFER Transaction: FromAccountID="+a1.getId()+" or ToAccountId=654 not found", e2.getMessage());
 
@@ -215,7 +215,7 @@ class TransactionManagerIT extends BaseIT {
 		makeAssertionsOnTransactions(t1, res_1);
 
 		// From-Account: from 1000 to 990
-		Account foundAcc_1 = accountManager.findById(t1.getFromAccountId());
+		Account foundAcc_1 = accountManager.findById(t1.getAccountId());
 		Assertions.assertEquals(BigDecimal.valueOf(990), foundAcc_1.getAmount());
 
 		// To-Account: from 500 to 550
@@ -309,11 +309,11 @@ class TransactionManagerIT extends BaseIT {
 		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null or Empty From-AccountID");
 
 		// (6) Invalid Transaction: empty From-AccountID
-		invalidTransaction.setFromAccountId("");
+		invalidTransaction.setAccountId("");
 		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null or Empty From-AccountID");
 
 		// (7) Invalid Transaction: null To-AccountID
-		invalidTransaction.setFromAccountId("123");
+		invalidTransaction.setAccountId("123");
 		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null or Empty To-AccountID");
 
 		// (8) Invalid Transaction: empty To-AccountID

@@ -1,4 +1,4 @@
-package com.company.bankaccounts.dao.exceptions;
+package com.company.bankaccounts.exceptions;
 
 public class ItemNotFoundException extends Exception {
 

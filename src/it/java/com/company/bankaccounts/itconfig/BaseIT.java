@@ -64,7 +64,7 @@ public abstract class BaseIT {
 		case TRANSFER:
 			TransactionTransfer castedExpected = (TransactionTransfer) expected;
 			TransactionTransfer castedActual = (TransactionTransfer) actual;
-			Assertions.assertEquals(castedExpected.getFromAccountId(), castedActual.getFromAccountId());
+			Assertions.assertEquals(castedExpected.getAccountId(), castedActual.getAccountId());
 			Assertions.assertEquals(castedExpected.getToAccountId(), castedActual.getToAccountId());
 			break;
 		default:
