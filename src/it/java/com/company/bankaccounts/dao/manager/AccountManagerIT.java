@@ -184,49 +184,4 @@ class AccountManagerIT extends BaseIT {
 		Assertions.assertNotNull(res_1);
 		makeAssertionsOnAccounts(a1, res_1);
 	}
-
-	@DisplayName("Account Validation Test")
-	@Test
-	void validateAccount_Test() throws InvalidInputException {
-
-		// (1) Invalid Account for INSERT: null
-		validateAndAssertException(OperationType.INSERT, null, "Invalid Account: Null Account");
-
-		// (2) Invalid Account for INSERT: null name
-		Account invalidAccount = new Account(null, null, null, null, null);
-		validateAndAssertException(OperationType.INSERT, invalidAccount, "Invalid Account: Null Name");
-
-		// (3) Invalid Account for INSERT: null surname
-		invalidAccount.setName("NAME");
-		validateAndAssertException(OperationType.INSERT, invalidAccount, "Invalid Account: Null Surname");
-
-		// (4) Invalid Account for INSERT: null pin
-		invalidAccount.setSurname("SURNAME");
-		validateAndAssertException(OperationType.INSERT, invalidAccount, "Invalid Account: Null or Empty Pin");
-
-		// (5) Invalid Account for INSERT: empty pin
-		invalidAccount.setPin("");
-		validateAndAssertException(OperationType.INSERT, invalidAccount, "Invalid Account: Null or Empty Pin");
-
-		// (6) Invalid Account for INSERT: null amount
-		invalidAccount.setPin("12345");
-		validateAndAssertException(OperationType.INSERT, invalidAccount, "Invalid Account: Null Amount");
-
-		// (7) Valid Account for INSERT: no exception here
-		invalidAccount.setAmount(BigDecimal.TEN);
-		accountManager.validateAccount(OperationType.INSERT, invalidAccount);
-
-		// (8) Invalid Account for UPDATE: null ID
-		validateAndAssertException(OperationType.UPDATE, invalidAccount, "Invalid Account: Null ID");
-
-		// (9) Valid Account for UPDATE: no exception here
-		invalidAccount.setId("888");
-		accountManager.validateAccount(OperationType.UPDATE, invalidAccount);
-	}
-
-	private void validateAndAssertException(OperationType opType, Account acc, String msg){
-		InvalidInputException e = Assertions
-				.assertThrows(InvalidInputException.class, () -> accountManager.validateAccount(opType, acc));
-		Assertions.assertEquals(msg, e.getMessage());
-	}
 }

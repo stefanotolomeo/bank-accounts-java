@@ -27,7 +27,7 @@ public class AccountManager extends AbstractManager implements IManager<Account>
 	@Override
 	public Account save(Account account) throws Exception {
 
-		validateAccount(OperationType.INSERT, account);
+		// The Input Account has been previously validated
 
 		String nextId = String.valueOf(valueOperations.increment(Constants.INDEX_CACHE_ACCOUNT));
 		account.setId(nextId);
@@ -36,28 +36,11 @@ public class AccountManager extends AbstractManager implements IManager<Account>
 		return findById(nextId);
 	}
 
-	void validateAccount(OperationType operationType, Account account) throws InvalidInputException {
-		try {
-			Preconditions.checkNotNull(account, "Null Account");
-			if (operationType == OperationType.UPDATE) {
-				Preconditions.checkNotNull(account.getId(), "Null ID");
-			}
-			Preconditions.checkNotNull(account.getName(), "Null Name");
-			Preconditions.checkNotNull(account.getSurname(), "Null Surname");
-			Preconditions.checkArgument(account.getPin() != null && !account.getPin().isEmpty(), "Null or Empty Pin");
-			if (operationType == OperationType.INSERT) {
-				Preconditions.checkNotNull(account.getAmount(), "Null Amount");
-			}
-		} catch (Exception e) {
-			throw new InvalidInputException("Invalid Account: " + e.getMessage());
-		}
-	}
-
 	// Update involved only Name, Surname, PIN. No updated for the amount - the only way to updated amount is with transactions
 	@Override
 	public Account update(Account account) throws Exception {
 
-		validateAccount(OperationType.UPDATE, account);
+		// The Input Account has been previously validated
 
 		Account cachedAcc = findById(account.getId());
 		if (cachedAcc == null) {

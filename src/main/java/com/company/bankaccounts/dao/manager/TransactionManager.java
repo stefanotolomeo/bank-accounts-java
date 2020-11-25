@@ -56,6 +56,7 @@ public class TransactionManager extends AbstractManager implements IManager<Abst
 		return findById(nextTransactionId);
 	}
 
+	// TODO: remove
 	void validateTransaction(AbstractTransaction transaction) throws InvalidInputException {
 
 		try {

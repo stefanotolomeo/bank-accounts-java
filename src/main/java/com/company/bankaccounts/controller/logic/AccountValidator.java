@@ -10,7 +10,9 @@ import java.math.BigDecimal;
 @Service
 public class AccountValidator {
 
-	// Used fof POST
+	/**
+	 * Used for POST-Request validation
+	 */
 	public void validate(AccountDTO accountDTO) throws InvalidInputException {
 
 		try {
@@ -21,24 +23,27 @@ public class AccountValidator {
 		}
 	}
 
-	// Used fof PUT
+	/**
+	 * Used for PUT-Request validation
+	 */
 	public void validate(AccountDTO accountDTO, String id) throws InvalidInputException {
 
 		try {
 			// For PUT-Request: it is needed to check the ID
-			Preconditions.checkArgument(id != null && !id.isEmpty(), "Null or Empty ID");
+			Preconditions.checkArgument(id != null && id.trim().length() != 0, "Null or Empty ID");
 			commonValidation(accountDTO);
 		} catch (Exception e) {
 			throw new InvalidInputException("Invalid Account: " + e.getMessage());
 		}
 	}
 
-	private void commonValidation(AccountDTO accDTO){
+	void commonValidation(AccountDTO accDTO){
 		Preconditions.checkNotNull(accDTO, "Null Account");
-		Preconditions.checkArgument(accDTO.getName() != null && !accDTO.getName().isEmpty(), "Null or Empty Name");
-		Preconditions.checkArgument(accDTO.getSurname() != null && !accDTO.getSurname().isEmpty(), "Null or Empty Surname");
-		Preconditions.checkArgument(accDTO.getPin() != null && !accDTO.getPin().isEmpty(), "Null or Empty Pin");
-		Preconditions.checkArgument(accDTO.getPin().length() == 4, "Invalid Pin: only 4 digits allowed");
+		Preconditions.checkArgument(accDTO.getName() != null && accDTO.getName().trim().length() != 0, "Null or Empty Name");
+		Preconditions.checkArgument(accDTO.getSurname() != null && accDTO.getSurname().trim().length() != 0, "Null or Empty Surname");
+		Preconditions.checkArgument(accDTO.getPin() != null && accDTO.getPin().trim().length() != 0, "Null or Empty Pin");
+		Preconditions.checkArgument(accDTO.getPin().matches("[0-9]+"), "Invalid Pin: only digits allowed");
+		Preconditions.checkArgument(accDTO.getPin().trim().length() == 4, "Invalid Pin: only 4 digits allowed");
 		Preconditions.checkNotNull(accDTO.getAmount(), "Null Amount");
 		Preconditions.checkArgument(accDTO.getAmount().compareTo(BigDecimal.ZERO) > 0, "Not Positive Amount");
 	}
