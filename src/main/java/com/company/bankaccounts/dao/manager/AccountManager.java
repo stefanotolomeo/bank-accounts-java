@@ -47,11 +47,8 @@ public class AccountManager extends AbstractManager implements IManager<Account>
 			throw new ItemNotFoundException("Cannot Update: Account ID not found");
 		}
 
-		if (account.getAmount().compareTo(cachedAcc.getAmount()) != 0) {
-			// ASSUMPTION: The only way to change the amount is with TRANSACTIONS. No manually operations is allowed
-			log.warn("Updating Amount is allowed only with TRANSACTION. No changes will be applied to the amount");
-			account.setAmount(cachedAcc.getAmount());
-		}
+		// Set the amount to the current one
+		account.setAmount(cachedAcc.getAmount());
 
 		hashOperations.put(CACHE_NAME, account.getId(), account);
 		log.info("Updated Account={}", account);

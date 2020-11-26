@@ -1,11 +1,10 @@
 package com.company.bankaccounts.dao.manager;
 
 import com.company.bankaccounts.config.Constants;
+import com.company.bankaccounts.dao.model.*;
 import com.company.bankaccounts.exceptions.FailedCRUDException;
 import com.company.bankaccounts.exceptions.InsufficientAmountException;
-import com.company.bankaccounts.exceptions.InvalidInputException;
 import com.company.bankaccounts.exceptions.ItemNotFoundException;
-import com.company.bankaccounts.dao.model.*;
 import com.company.bankaccounts.itconfig.BaseIT;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,7 +94,8 @@ class TransactionManagerIT extends BaseIT {
 	@Test
 	void delete_Test() {
 
-		FailedCRUDException e = Assertions.assertThrows(FailedCRUDException.class, () -> transactionManager.delete(withdrawTransaction.getId()));
+		FailedCRUDException e = Assertions
+				.assertThrows(FailedCRUDException.class, () -> transactionManager.delete(withdrawTransaction.getId()));
 		Assertions.assertEquals(OperationType.DELETE, e.getOperation());
 		Assertions.assertEquals("Unsupported operation: cannot manually delete a TRANSACTION record", e.getMessage());
 
@@ -166,7 +166,8 @@ class TransactionManagerIT extends BaseIT {
 		accountManager.save(a1);
 
 		// (1.c) Execute an allowed Transaction and ensure the related Account's amount decreased
-		TransactionDeposit t2 = new TransactionDeposit(null, BigDecimal.TEN, a1.getId());;
+		TransactionDeposit t2 = new TransactionDeposit(null, BigDecimal.TEN, a1.getId());
+		;
 		AbstractTransaction res_2 = transactionManager.save(t2);
 		Assertions.assertNotNull(res_2);
 		makeAssertionsOnTransactions(t2, res_2);
@@ -194,15 +195,16 @@ class TransactionManagerIT extends BaseIT {
 		Account a1 = new Account(null, "name_1", "surname_1", "12345", BigDecimal.valueOf(1000));
 		accountManager.save(a1);
 
-		t1.setAccountId(a1.getId());	// Save the REAL AccountID for From-AccountID
+		t1.setAccountId(a1.getId());    // Save the REAL AccountID for From-AccountID
 		ItemNotFoundException e2 = Assertions.assertThrows(ItemNotFoundException.class, () -> transactionManager.save(t1));
-		Assertions.assertEquals("Cannot save TRANSFER Transaction: FromAccountID="+a1.getId()+" or ToAccountId=654 not found", e2.getMessage());
+		Assertions.assertEquals("Cannot save TRANSFER Transaction: FromAccountID=" + a1.getId() + " or ToAccountId=654 not found",
+				e2.getMessage());
 
 		// (1.c) Add To-Account, but failed again: not enough amount into the FROM account
 		Account a2 = new Account(null, "name_2", "surname_2", "67890", BigDecimal.valueOf(500));
 		accountManager.save(a2);
 
-		t1.setToAccountId(a2.getId());	// Save the REAL AccountID for To-AccountID
+		t1.setToAccountId(a2.getId());    // Save the REAL AccountID for To-AccountID
 		InsufficientAmountException e3 = Assertions.assertThrows(InsufficientAmountException.class, () -> transactionManager.save(t1));
 		Assertions.assertEquals("Not enough amount", e3.getMessage());
 		Assertions.assertEquals(BigDecimal.valueOf(1000), e3.getAvailableFunds());
@@ -221,114 +223,5 @@ class TransactionManagerIT extends BaseIT {
 		// To-Account: from 500 to 550
 		Account foundAcc_2 = accountManager.findById(t1.getToAccountId());
 		Assertions.assertEquals(BigDecimal.valueOf(510), foundAcc_2.getAmount());
-	}
-
-	@DisplayName("Validation of WITHDRAW Transaction")
-	@Test
-	void validateTransaction_withdraw_Test() throws InvalidInputException {
-
-		// (1) Invalid Transaction: null
-		validateAndAssertException(null, "Invalid Transaction: Null Transaction");
-
-		// (2) Invalid Transaction: null Amount
-		TransactionWithdraw invalidTransaction = new TransactionWithdraw(null, null, null);
-		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null Amount");
-
-		// (3) Invalid Transaction: negative Amount
-		invalidTransaction.setAmount(BigDecimal.valueOf(-12));
-		validateAndAssertException(invalidTransaction, "Invalid Transaction: Not Positive Amount");
-
-		// (4) Invalid Transaction: zero Amount
-		invalidTransaction.setAmount(BigDecimal.ZERO);
-		validateAndAssertException(invalidTransaction, "Invalid Transaction: Not Positive Amount");
-
-		// (5) Invalid Transaction: null AccountID
-		invalidTransaction.setAmount(BigDecimal.TEN);
-		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null or Empty AccountID");
-
-		// (6) Invalid Transaction: empty AccountID
-		invalidTransaction.setAccountId("");
-		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null or Empty AccountID");
-
-		// (7) Valid Transaction: no exception here
-		invalidTransaction.setAccountId("123");
-		transactionManager.validateTransaction(invalidTransaction);
-	}
-
-	@DisplayName("Validation of DEPOSIT Transaction")
-	@Test
-	void validateTransaction_deposit_Test() throws InvalidInputException {
-
-		// (1) Invalid Transaction: null
-		validateAndAssertException(null, "Invalid Transaction: Null Transaction");
-
-		// (2) Invalid Transaction: null Amount
-		TransactionDeposit invalidTransaction = new TransactionDeposit(null, null, null);
-		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null Amount");
-
-		// (3) Invalid Transaction: negative Amount
-		invalidTransaction.setAmount(BigDecimal.valueOf(-12));
-		validateAndAssertException(invalidTransaction, "Invalid Transaction: Not Positive Amount");
-
-		// (4) Invalid Transaction: zero Amount
-		invalidTransaction.setAmount(BigDecimal.ZERO);
-		validateAndAssertException(invalidTransaction, "Invalid Transaction: Not Positive Amount");
-
-		// (5) Invalid Transaction: null AccountID
-		invalidTransaction.setAmount(BigDecimal.TEN);
-		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null or Empty AccountID");
-
-		// (6) Invalid Transaction: empty AccountID
-		invalidTransaction.setAccountId("");
-		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null or Empty AccountID");
-
-		// (7) Valid Transaction: no exception here
-		invalidTransaction.setAccountId("123");
-		transactionManager.validateTransaction(invalidTransaction);
-	}
-
-	@Test
-	void validateTransaction_transfer_Test() throws InvalidInputException {
-		// (1) Invalid Transaction: null
-		validateAndAssertException(null, "Invalid Transaction: Null Transaction");
-
-		// (2) Invalid Transaction: null Amount
-		TransactionTransfer invalidTransaction = new TransactionTransfer(null, null, null, null);
-		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null Amount");
-
-		// (3) Invalid Transaction: negative Amount
-		invalidTransaction.setAmount(BigDecimal.valueOf(-12));
-		validateAndAssertException(invalidTransaction, "Invalid Transaction: Not Positive Amount");
-
-		// (4) Invalid Transaction: zero Amount
-		invalidTransaction.setAmount(BigDecimal.ZERO);
-		validateAndAssertException(invalidTransaction, "Invalid Transaction: Not Positive Amount");
-
-		// (5) Invalid Transaction: null From-AccountID
-		invalidTransaction.setAmount(BigDecimal.TEN);
-		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null or Empty From-AccountID");
-
-		// (6) Invalid Transaction: empty From-AccountID
-		invalidTransaction.setAccountId("");
-		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null or Empty From-AccountID");
-
-		// (7) Invalid Transaction: null To-AccountID
-		invalidTransaction.setAccountId("123");
-		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null or Empty To-AccountID");
-
-		// (8) Invalid Transaction: empty To-AccountID
-		invalidTransaction.setToAccountId("");
-		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null or Empty To-AccountID");
-
-		// (9) Valid Transaction: no exception here
-		invalidTransaction.setToAccountId("456");
-		transactionManager.validateTransaction(invalidTransaction);
-
-	}
-
-	private void validateAndAssertException(AbstractTransaction trans, String msg){
-		InvalidInputException e = Assertions
-				.assertThrows(InvalidInputException.class, () -> transactionManager.validateTransaction(trans));
-		Assertions.assertEquals(msg, e.getMessage());
 	}
 }

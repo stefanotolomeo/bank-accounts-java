@@ -60,7 +60,7 @@ class AccountValidatorTest extends BaseTest {
 
 		// (11) Valid Account: no exception here
 		invalidAccount.setAmount(BigDecimal.TEN);
-		accountValidator.commonValidation(invalidAccount);
+		accountValidator.commonValidation(invalidAccount.getName(), invalidAccount.getSurname(), invalidAccount.getPin());
 	}
 
 	@DisplayName("Validate Account: For PUT Request")

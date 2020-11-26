@@ -21,7 +21,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -45,8 +44,8 @@ public class TransactionController {
 	@GetMapping("/all")
 	public ResponseEntity<Map<String, TransactionDTO>> findAll() {
 		log.debug("Getting all Transactions");
-		try {
-			// @formatter:off
+
+		// @formatter:off
 			Map<String, TransactionDTO> res = transactionManager.findAll()
 					.entrySet()
 					.stream()
@@ -55,21 +54,19 @@ public class TransactionController {
 						entry -> converter.convertToDTO(entry.getValue())
 				));
 			// @formatter:on
-			log.debug("Found {} transactions. Returning..", res.size());
-			return ResponseEntity.status(HttpStatus.OK).body(res);
-		} catch (Exception e) {
-			log.error("Unexpected error", e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-		}
+		log.debug("Found {} transactions. Returning..", res.size());
+
+		return ResponseEntity.status(HttpStatus.OK).body(res);
 	}
 
 	@GetMapping("/allByAccount/{id}")
 	public ResponseEntity<List<TransactionDTO>> findAllByAccountId(
 			@PathVariable("id")
 			final String id) {
-		log.debug("Getting all Transactions for Account={}", id);
-		try {
-			// @formatter:off
+
+		log.debug("Getting all Transactions for AccountID={}", id);
+
+		// @formatter:off
 			List<TransactionDTO> res = transactionManager.findAll()
 					.values()
 					.stream()
@@ -79,18 +76,19 @@ public class TransactionController {
 					.sorted(Comparator.comparingInt(o -> Integer.parseInt(o.getId())))
 					.collect(Collectors.toList());
 			// @formatter:on
-			log.debug("Found {} transactions. Returning..", res.size());
-			return ResponseEntity.status(HttpStatus.OK).body(res);
-		} catch (Exception e) {
-			log.error("Unexpected error", e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		log.debug("Found {} transactions. Returning..", res.size());
+
+		if(res.isEmpty()){
+			return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 		}
+
+		return ResponseEntity.status(HttpStatus.OK).body(res);
 	}
 
 	@GetMapping("/{id}")
 	public ResponseEntity<TransactionDTO> findById(
 			@PathVariable("id")
-			final String id) {
+			final String id) throws Exception {
 		log.debug("Getting Transaction with ID= " + id);
 		try {
 
@@ -102,117 +100,102 @@ public class TransactionController {
 
 			return ResponseEntity.status(HttpStatus.OK).body(transDTO);
 		} catch (ItemNotFoundException e) {
+			// This exception cannot be managed from the general ExceptionHandler because here the status is OK
+
 			log.error("No element found", e);
 			return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-		} catch (InvalidInputException e) {
-			log.error("Bad input for request", e);
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-		} catch (Exception e) {
-			log.error("Unexpected error", e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 	}
 
 	@PostMapping("/withdraw")
 	public ResponseEntity<String> saveWithdraw(
 			@RequestBody
-			final WithdrawTransactionDTO withdrawDTO) {
+			final WithdrawTransactionDTO withdraw) throws Exception {
 
-		log.debug("Received Withdraw-Transaction request={}", withdrawDTO);
+		log.debug("Received Withdraw-Transaction. Validating request={}", withdraw);
 
-		try {
-			log.debug("Validating request..");
-			validator.validate(withdrawDTO);
+		validator.validate(withdraw);
 
-			log.debug("Request is valid. Checking PIN..");
-			validator.checkPin(withdrawDTO.getAccountId(), withdrawDTO.getPin());
-			log.debug("Pin is valid. Converting into Internal Model..");
+		log.debug("Request is valid. Checking PIN..");
+		validator.checkPin(withdraw.getAccountId(), withdraw.getPin());
+		log.debug("Pin is valid. Converting into Internal Model..");
 
-			log.debug("Request is valid. Converting into Internal Model..");
-			TransactionWithdraw transWithdraw = converter.convertToInternalModel(withdrawDTO);
+		log.debug("Request is valid. Converting into Internal Model..");
+		TransactionWithdraw transWithdraw = converter.convertToInternalModel(withdraw);
 
-			log.debug("Converted Withdraw-Transaction is={}. Executing..", transWithdraw);
+		log.debug("Converted Withdraw-Transaction is={}. Executing..", transWithdraw);
 
-			AbstractTransaction savedTrans = transactionManager.save(transWithdraw);
-			log.debug("Withdraw-Transaction executed successfully: {}", savedTrans);
+		AbstractTransaction savedTrans = transactionManager.save(transWithdraw);
+		log.debug("Withdraw-Transaction executed successfully: {}", savedTrans);
 
-			return ResponseEntity.status(HttpStatus.OK).body(savedTrans.getId());
-		} catch (InsufficientAmountException e) {
-			log.error("Operation not allowed due to insufficient amount", e);
-			String msg = String.format("Operation not allowed: %s.  Available:%s, Requested=%s", e.getMessage(), e.getAvailableFunds(),
-					e.getRequestedFunds());
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
-		} catch (InvalidInputException | ItemNotFoundException e) {
-			log.error("Bad input for request", e);
-			String msg = "Bad input: " + e.getMessage();
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
-		} catch (Exception e) {
-			log.error("Unexpected error", e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-		}
+		return ResponseEntity.status(HttpStatus.OK).body(savedTrans.getId());
 	}
 
 	@PostMapping("/deposit")
 	public ResponseEntity<String> saveDeposit(
 			@RequestBody
-			final DepositTransactionDTO depositDTO) {
+			final DepositTransactionDTO deposit) throws Exception {
 
-		log.debug("Received Deposit-Transaction request={}", depositDTO);
+		log.debug("Received Deposit-Transaction. Validating request={}", deposit);
 
-		try {
-			log.debug("Validating request..");
-			validator.validate(depositDTO);
+		validator.validate(deposit);
 
-			log.debug("Request is valid. Checking PIN..");
-			validator.checkPin(depositDTO.getAccountId(), depositDTO.getPin());
-			log.debug("Pin is valid. Executing Transaction..");
+		log.debug("Request is valid. Checking PIN..");
+		validator.checkPin(deposit.getAccountId(), deposit.getPin());
+		log.debug("Pin is valid. Executing Transaction..");
 
-			AbstractTransaction savedTrans = transactionManager.save(converter.convertToInternalModel(depositDTO));
-			log.debug("Deposit-Transaction executed successfully: {}", savedTrans);
+		AbstractTransaction savedTrans = transactionManager.save(converter.convertToInternalModel(deposit));
+		log.debug("Deposit-Transaction executed successfully: {}", savedTrans);
 
-			return ResponseEntity.status(HttpStatus.OK).body(savedTrans.getId());
-		} catch (InvalidInputException | ItemNotFoundException e) {
-			log.error("Bad input for request", e);
-			String msg = "Bad input: " + e.getMessage();
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
-		} catch (Exception e) {
-			log.error("Unexpected error", e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-		}
+		return ResponseEntity.status(HttpStatus.OK).body(savedTrans.getId());
 	}
 
 	@PostMapping("/transfer")
 	public ResponseEntity<String> saveTransfer(
 			@RequestBody
-			final TransferTransactionDTO transferDTO) {
+			final TransferTransactionDTO transfer) throws Exception {
 
-		log.debug("Received Transfer-Transaction request={}", transferDTO);
+		log.debug("Received Transfer-Transaction. Validating request={}", transfer);
 
-		try {
-			log.debug("Validating request..");
-			validator.validate(transferDTO);
+		validator.validate(transfer);
 
-			log.debug("Request is valid. Checking PIN..");
-			validator.checkPin(transferDTO.getFromAccountId(), transferDTO.getPin());
-			log.debug("Pin is valid. Executing Transaction..");
+		log.debug("Request is valid. Checking PIN..");
+		validator.checkPin(transfer.getFromAccountId(), transfer.getPin());
+		log.debug("Pin is valid. Executing Transaction..");
 
-			AbstractTransaction savedTrans = transactionManager.save(converter.convertToInternalModel(transferDTO));
-			log.debug("Deposit-Transaction executed successfully: {}", savedTrans);
+		AbstractTransaction savedTrans = transactionManager.save(converter.convertToInternalModel(transfer));
+		log.debug("Deposit-Transaction executed successfully: {}", savedTrans);
 
-			return ResponseEntity.status(HttpStatus.OK).body(savedTrans.getId());
-		} catch (InsufficientAmountException e) {
-			log.error("Operation not allowed due to insufficient amount", e);
-			String msg = String.format("Operation not allowed: %s.  Available:%s, Requested=%s", e.getMessage(), e.getAvailableFunds(),
-					e.getRequestedFunds());
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
-		} catch (InvalidInputException | ItemNotFoundException e) {
+		return ResponseEntity.status(HttpStatus.OK).body(savedTrans.getId());
+	}
+
+	// It manages: InvalidInputException, ItemNotFoundException and in general Exception
+	@ExceptionHandler({ Exception.class })
+	public ResponseEntity<String> handleException(Exception e) {
+
+		if (e instanceof InvalidInputException) {
 			log.error("Bad input for request", e);
 			String msg = "Bad input: " + e.getMessage();
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
-		} catch (Exception e) {
-			log.error("Unexpected error", e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
-	}
 
+		if (e instanceof ItemNotFoundException) {
+			log.error("No element found", e);
+			String msg = "No element found: " + e.getMessage();
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
+		}
+
+		if (e instanceof InsufficientAmountException) {
+			InsufficientAmountException customExp = (InsufficientAmountException) e;
+			log.error("Operation not allowed due to insufficient amount", e);
+			String msg = String
+					.format("Operation not allowed: %s.  Available:%s, Requested=%s", e.getMessage(), customExp.getAvailableFunds(),
+							customExp.getRequestedFunds());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
+		}
+
+		// Default
+		log.error("Unexpected error", e);
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+	}
 }

@@ -28,7 +28,7 @@ public class SwaggerConfig implements WebMvcConfigurer {
 		//@formatter:off
         return new Docket(DocumentationType.SWAGGER_2)
             .select()
-              .apis(RequestHandlerSelectors.any())
+              .apis(RequestHandlerSelectors.basePackage("com.company.bankaccounts.controller"))
               .paths(PathSelectors.any())
               .build()
             .apiInfo(apiInfo());

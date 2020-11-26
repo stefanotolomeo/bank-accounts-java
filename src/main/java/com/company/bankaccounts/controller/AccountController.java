@@ -1,12 +1,13 @@
 package com.company.bankaccounts.controller;
 
 import com.company.bankaccounts.controller.dto.AccountDTO;
+import com.company.bankaccounts.controller.dto.BaseAccountDTO;
 import com.company.bankaccounts.controller.logic.AccountConverter;
 import com.company.bankaccounts.controller.logic.AccountValidator;
-import com.company.bankaccounts.exceptions.InvalidInputException;
-import com.company.bankaccounts.exceptions.ItemNotFoundException;
 import com.company.bankaccounts.dao.manager.AccountManager;
 import com.company.bankaccounts.dao.model.Account;
+import com.company.bankaccounts.exceptions.InvalidInputException;
+import com.company.bankaccounts.exceptions.ItemNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,38 +36,28 @@ public class AccountController {
 	@PostMapping
 	public ResponseEntity<String> save(
 			@RequestBody
-			final AccountDTO accountDTO) {
+			final AccountDTO account) throws Exception {
 
-		log.debug("Received Save-Account request={}", accountDTO);
+		log.debug("Received Save-Account request={}", account);
 
-		try {
-			log.debug("Validating request..");
-			validator.validate(accountDTO);
+		log.debug("Validating request..");
+		validator.validate(account);
 
-			log.debug("Request is valid. Converting into Internal Model..");
-			Account acc = converter.convertToInternalModel(accountDTO);
+		log.debug("Request is valid. Converting into Internal Model..");
+		Account acc = converter.convertToInternalModel(account);
 
-			log.debug("Converted Account is={}. Saving account..", acc);
-			Account savedAccount = accountManager.save(acc);
+		log.debug("Converted Account is={}. Saving account..", acc);
+		Account savedAccount = accountManager.save(acc);
 
-			log.debug("Successfully added Account={}", savedAccount);
-			return ResponseEntity.status(HttpStatus.OK).body(savedAccount.getId());
-		} catch (InvalidInputException e) {
-			log.error("Bad input for request", e);
-			String msg = "Bad input: " + e.getMessage();
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
-		} catch (Exception e) {
-			log.error("Unexpected error", e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-		}
+		log.debug("Successfully added Account={}", savedAccount);
+		return ResponseEntity.status(HttpStatus.OK).body(savedAccount.getId());
 	}
 
 	@GetMapping("/all")
 	public ResponseEntity<Map<String, AccountDTO>> findAll() {
 		log.debug("Getting all Accounts");
-		try {
 
-			// @formatter:off
+		// @formatter:off
 			Map<String, AccountDTO> res = accountManager.findAll()
 					.entrySet()
 					.stream()
@@ -75,19 +66,16 @@ public class AccountController {
 						entry -> converter.convertToDTO(entry.getValue())
 				));
 			// @formatter:on
-			log.debug("Found {} accounts. Returning..", res.size());
-			return ResponseEntity.status(HttpStatus.OK).body(res);
-		} catch (Exception e) {
-			log.error("Unexpected error", e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-		}
+		log.debug("Found {} accounts. Returning..", res.size());
+		return ResponseEntity.status(HttpStatus.OK).body(res);
 	}
 
 	@GetMapping("/{id}")
 	public ResponseEntity<AccountDTO> findById(
 			@PathVariable("id")
-			final String id) {
-		log.debug("Getting Account with ID= " + id);
+			final String id) throws Exception {
+
+		log.debug("Getting Account with ID={}", id);
 		try {
 			Account foundAcc = accountManager.findById(id);
 
@@ -97,74 +85,68 @@ public class AccountController {
 
 			return ResponseEntity.status(HttpStatus.OK).body(accDTO);
 		} catch (ItemNotFoundException e) {
+			// This exception cannot be managed from the general ExceptionHandler because here the status is OK
+
 			log.error("No element found", e);
 			return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-		} catch (InvalidInputException e) {
-			log.error("Bad input for request", e);
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-		} catch (Exception e) {
-			log.error("Unexpected error", e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 	}
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<String> delete(
 			@PathVariable("id")
-			final String id) {
-		log.info("Deleting Account with ID= " + id);
+			final String id) throws Exception {
 
-		try {
-			log.debug("Deleting Account with ID={}", id);
-			Account deletedAccount = accountManager.delete(id);
+		log.debug("Deleting Account with ID={}", id);
+		Account deletedAccount = accountManager.delete(id);
 
-			log.debug("Successfully deleted Account with ID = {}", deletedAccount.getId());
-			return ResponseEntity.status(HttpStatus.OK).body(id);
-		} catch (ItemNotFoundException e) {
-			log.error("No element found", e);
-			String msg = "No element found: " + e.getMessage();
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
-		} catch (Exception e) {
-			log.error("Unexpected error", e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-		}
+		log.debug("Successfully deleted Account with ID = {}", deletedAccount.getId());
+		return ResponseEntity.status(HttpStatus.OK).body(id);
 	}
 
 	@PutMapping
 	public ResponseEntity<String> update(
 			@RequestBody
-			final AccountDTO accountDTO, String id) {
+			final BaseAccountDTO account, String id) throws Exception {
 
-		log.debug("Received Update-Account request={} for ID={}", accountDTO, id);
+		log.debug("Received Update-Account request={} for ID={}", account, id);
 
-		try {
-			log.debug("Validating request..");
-			validator.validate(accountDTO, id);
+		log.debug("Validating request..");
+		validator.validate(account, id);
 
-			log.debug("Request is valid. Converting into Internal Model..");
-			Account acc = converter.convertToInternalModel(accountDTO, id);
+		log.debug("Request is valid. Converting into Internal Model..");
+		Account acc = converter.convertToInternalModel(account, id);
 
-			log.debug("Converted Account is={}. Updating account..", acc);
+		log.debug("Converted Account is={}. Updating account..", acc);
 
-			// Note: The following accounts' amounts could be different
-			Account updated = accountManager.update(acc);
+		// Note: The following accounts' amounts could be different
+		Account updated = accountManager.update(acc);
 
-			log.debug("Successfully updated Account with ID = {}.", updated.getId());
+		log.debug("Successfully updated Account with ID = {}.", updated.getId());
 
-			return ResponseEntity.status(HttpStatus.OK).body(updated.getId());
-		} catch (InvalidInputException e) {
+		return ResponseEntity.status(HttpStatus.OK).body(updated.getId());
+
+	}
+
+	// It manages: InvalidInputException, ItemNotFoundException and in general Exception
+	@ExceptionHandler({ Exception.class })
+	public ResponseEntity<String> handleException(Exception e) {
+
+		if (e instanceof InvalidInputException) {
 			log.error("Bad input for request", e);
 			String msg = "Bad input: " + e.getMessage();
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
-		} catch (ItemNotFoundException e) {
+		}
+
+		if (e instanceof ItemNotFoundException) {
 			log.error("No element found", e);
 			String msg = "No element found: " + e.getMessage();
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
-		} catch (Exception e) {
-			log.error("Unexpected error", e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 
+		// Default
+		log.error("Unexpected error", e);
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 	}
 
 }
