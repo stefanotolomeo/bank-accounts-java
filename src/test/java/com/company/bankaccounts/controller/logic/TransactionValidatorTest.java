@@ -163,6 +163,4 @@ class TransactionValidatorTest extends BaseTest {
 		}
 		Assertions.assertEquals(msg, e.getMessage());
 	}
-
-		// TODO: other tests
 }
