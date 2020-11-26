@@ -1,0 +1,14 @@
+[
+  {
+    "id": "1",
+    "amount": 500,
+    "accountId": "1",
+    "type": "DEPOSIT"
+  },
+  {
+    "id": "2",
+    "amount": 400,
+    "accountId": "2",
+    "type": "DEPOSIT"
+  }
+]

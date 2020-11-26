@@ -1,0 +1,16 @@
+[
+  {
+    "id": "1",
+    "name": "Mark",
+    "surname": "Zuck",
+    "pin": "1111",
+    "amount": 1000
+  },
+  {
+    "id": "2",
+    "name": "John",
+    "surname": "Smith",
+    "pin": "2222",
+    "amount": 500
+  }
+]

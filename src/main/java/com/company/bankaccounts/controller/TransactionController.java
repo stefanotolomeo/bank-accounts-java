@@ -71,7 +71,7 @@ public class TransactionController {
 					.values()
 					.stream()
 					.filter(t -> t.getAccountId().equals(id) ||
-							(t.getTransactionType()==TransactionType.TRANSFER && ((TransactionTransfer)t).getToAccountId().equals(id)))
+							(t.getType()==TransactionType.TRANSFER && ((TransactionTransfer)t).getToAccountId().equals(id)))
 					.map(t -> converter.convertToDTO(t))
 					.sorted(Comparator.comparingInt(o -> Integer.parseInt(o.getId())))
 					.collect(Collectors.toList());

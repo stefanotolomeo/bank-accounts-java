@@ -5,7 +5,11 @@ import java.math.BigDecimal;
 public class TransactionTransfer extends AbstractTransaction {
 
 	private static final long serialVersionUID = -4598348759006345491L;
-	private String toAccountId;		// to account ID
+	private String toAccountId;        // to account ID
+
+	// Used by REDIS default serializer
+	public TransactionTransfer() {
+	}
 
 	public TransactionTransfer(String id, BigDecimal amount, String fromAccountId, String toAccountId) {
 		super(TransactionType.TRANSFER, id, amount, fromAccountId);
@@ -22,7 +26,7 @@ public class TransactionTransfer extends AbstractTransaction {
 
 	@Override
 	public String toString() {
-		return "TransactionTransfer{" + "fromAccountId='" + accountId + '\'' + ", toAccountId='" + toAccountId + '\'' + ", id='" + id
-				+ '\'' + ", amount=" + amount + '}';
+		return "TransactionTransfer{" + "fromAccountId='" + accountId + '\'' + ", toAccountId='" + toAccountId + '\'' + ", id='" + id + '\''
+				+ ", amount=" + amount + '}';
 	}
 }

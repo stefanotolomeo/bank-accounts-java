@@ -50,11 +50,11 @@ public abstract class BaseIT {
 	}
 
 	protected void makeAssertionsOnTransactions(AbstractTransaction expected, AbstractTransaction actual) throws Exception {
-		Assertions.assertEquals(expected.getTransactionType(), actual.getTransactionType());
+		Assertions.assertEquals(expected.getType(), actual.getType());
 		Assertions.assertEquals(expected.getId(), actual.getId());
 		Assertions.assertEquals(expected.getAmount(), actual.getAmount());
 
-		switch (actual.getTransactionType()) {
+		switch (actual.getType()) {
 		case WITHDRAW:
 			Assertions.assertEquals(((TransactionWithdraw) expected).getAccountId(), ((TransactionWithdraw) actual).getAccountId());
 			break;

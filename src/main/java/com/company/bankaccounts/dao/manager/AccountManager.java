@@ -1,27 +1,41 @@
 package com.company.bankaccounts.dao.manager;
 
 import com.company.bankaccounts.config.Constants;
+import com.company.bankaccounts.dao.model.Account;
 import com.company.bankaccounts.exceptions.InvalidInputException;
 import com.company.bankaccounts.exceptions.ItemNotFoundException;
-import com.company.bankaccounts.dao.model.Account;
-import com.company.bankaccounts.dao.model.OperationType;
-import com.google.common.base.Preconditions;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
+import java.util.List;
 import java.util.Map;
 
 @Repository
 public class AccountManager extends AbstractManager implements IManager<Account> {
 
+	@Value("${init.fixture.account.enabled}")
+	private boolean initWithFixtures;
+
 	@Autowired
 	private HashOperations<String, String, Account> hashOperations;
 
 	@PostConstruct
-	public void initialize() {
+	public void initialize() throws Exception {
 		this.CACHE_NAME = Constants.CACHE_ACCOUNT_NAME;
+
+		if (initWithFixtures) {
+			List<Account> accountList = new ObjectMapper()
+					.readValue(new File("src/main/resources/fixtures/accounts.json"), new TypeReference<List<Account>>() {});
+			for (Account a : accountList) {
+				this.save(a);
+			}
+		}
 	}
 
 	@Override
@@ -58,13 +72,13 @@ public class AccountManager extends AbstractManager implements IManager<Account>
 
 	@Override
 	public Account findById(String id) throws Exception {
-		if(id == null || id.trim().length() == 0){
+		if (id == null || id.trim().length() == 0) {
 			throw new InvalidInputException("Invalid Input: Null or empty");
 		}
 
 		Account foundAcc = hashOperations.get(CACHE_NAME, id);
-		if(foundAcc == null){
-			throw new ItemNotFoundException("No Account found for ID="+id);
+		if (foundAcc == null) {
+			throw new ItemNotFoundException("No Account found for ID=" + id);
 		}
 
 		return foundAcc;

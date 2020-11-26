@@ -11,6 +11,9 @@ public class Account  implements Serializable {
 	private String pin;
 	private BigDecimal amount;	// in EUR
 
+	// Used by REDIS default serializer
+	public Account(){}
+
 	public Account(String id, String name, String surname, String pin, BigDecimal amount) {
 		this.id = id;
 		this.name = name;

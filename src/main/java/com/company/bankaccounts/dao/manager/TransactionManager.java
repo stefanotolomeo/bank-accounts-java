@@ -1,22 +1,31 @@
 package com.company.bankaccounts.dao.manager;
 
 import com.company.bankaccounts.config.Constants;
+import com.company.bankaccounts.dao.logic.TransactionalExecutor;
+import com.company.bankaccounts.dao.model.*;
 import com.company.bankaccounts.exceptions.FailedCRUDException;
 import com.company.bankaccounts.exceptions.InvalidInputException;
 import com.company.bankaccounts.exceptions.ItemNotFoundException;
-import com.company.bankaccounts.dao.logic.TransactionalExecutor;
-import com.company.bankaccounts.dao.model.*;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Repository
 public class TransactionManager extends AbstractManager implements IManager<AbstractTransaction> {
+
+	@Value("${init.fixture.transaction.enabled}")
+	private boolean initWithFixtures;
 
 	@Autowired
 	private HashOperations<String, String, AbstractTransaction> hashOperations;
@@ -25,8 +34,28 @@ public class TransactionManager extends AbstractManager implements IManager<Abst
 	private TransactionalExecutor transactionalExecutor;
 
 	@PostConstruct
-	public void initialize() {
+	public void initialize() throws Exception {
 		this.CACHE_NAME = Constants.CACHE_TRANSACTION_NAME;
+
+		if (initWithFixtures) {
+
+			List<AbstractTransaction> initTrans = new ArrayList<>();
+			// (1) Add Deposit transactions
+			initTrans.addAll(new ObjectMapper()
+					.readValue(new File("src/main/resources/fixtures/transaction_deposit.json"), new TypeReference<List<TransactionDeposit>>() {}));
+
+			// (2) Add Withdraw transactions
+			initTrans.addAll(new ObjectMapper()
+					.readValue(new File("src/main/resources/fixtures/transaction_withdraw.json"), new TypeReference<List<TransactionWithdraw>>() {}));
+
+			// (3) Add Transfer transactions
+			initTrans.addAll(new ObjectMapper()
+					.readValue(new File("src/main/resources/fixtures/transaction_transfer.json"), new TypeReference<List<TransactionTransfer>>() {}));
+
+			for (AbstractTransaction t : initTrans) {
+				this.save(t);
+			}
+		}
 	}
 
 	// At this layer, the PIN has been checked yet
@@ -38,7 +67,7 @@ public class TransactionManager extends AbstractManager implements IManager<Abst
 		String nextTransactionId = String.valueOf(valueOperations.increment(Constants.INDEX_CACHE_ACCOUNT));
 		item.setId(nextTransactionId);
 
-		switch (item.getTransactionType()) {
+		switch (item.getType()) {
 		case WITHDRAW:
 			TransactionWithdraw withdrawTrans = (TransactionWithdraw) item;
 			transactionalExecutor.saveWithdrawTransaction(withdrawTrans);
@@ -63,14 +92,14 @@ public class TransactionManager extends AbstractManager implements IManager<Abst
 			Preconditions.checkNotNull(transaction, "Null Transaction");
 			Preconditions.checkNotNull(transaction.getAmount(), "Null Amount");
 			Preconditions.checkArgument(transaction.getAmount().compareTo(BigDecimal.ZERO) > 0, "Not Positive Amount");
-			if (transaction.getTransactionType() == TransactionType.WITHDRAW) {
+			if (transaction.getType() == TransactionType.WITHDRAW) {
 				TransactionWithdraw withdraw = (TransactionWithdraw) transaction;
 				Preconditions
 						.checkArgument(withdraw.getAccountId() != null && !withdraw.getAccountId().isEmpty(), "Null or Empty AccountID");
-			} else if (transaction.getTransactionType() == TransactionType.DEPOSIT) {
+			} else if (transaction.getType() == TransactionType.DEPOSIT) {
 				TransactionDeposit deposit = (TransactionDeposit) transaction;
 				Preconditions.checkArgument(deposit.getAccountId() != null && !deposit.getAccountId().isEmpty(), "Null or Empty AccountID");
-			} else if (transaction.getTransactionType() == TransactionType.TRANSFER) {
+			} else if (transaction.getType() == TransactionType.TRANSFER) {
 				TransactionTransfer transfer = (TransactionTransfer) transaction;
 				Preconditions.checkArgument(transfer.getAccountId() != null && !transfer.getAccountId().isEmpty(),
 						"Null or Empty From-AccountID");

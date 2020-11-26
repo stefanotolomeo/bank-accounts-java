@@ -7,21 +7,25 @@ public abstract class AbstractTransaction implements Serializable {
 
 	private static final long serialVersionUID = 4601465263029245494L;
 
-	private final TransactionType transactionType;
+	private TransactionType type;
 
 	protected String id;
 	protected BigDecimal amount; // Amount in EUR
-	protected String accountId;	// source (for Withdrawal and Transfer) or destination (for Deposit)
+	protected String accountId;    // source (for Withdrawal and Transfer) or destination (for Deposit)
 
-	public AbstractTransaction(TransactionType transactionType, String id, BigDecimal amount, String accountId) {
-		this.transactionType = transactionType;
+	// Used by REDIS default serializer
+	public AbstractTransaction() {
+	}
+
+	public AbstractTransaction(TransactionType type, String id, BigDecimal amount, String accountId) {
+		this.type = type;
 		this.id = id;
 		this.amount = amount;
 		this.accountId = accountId;
 	}
 
-	public TransactionType getTransactionType() {
-		return transactionType;
+	public TransactionType getType() {
+		return type;
 	}
 
 	public String getId() {

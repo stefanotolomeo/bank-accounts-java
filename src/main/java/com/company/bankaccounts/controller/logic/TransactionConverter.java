@@ -27,7 +27,7 @@ public class TransactionConverter {
 
 	public TransactionDTO convertToDTO(AbstractTransaction t) {
 
-		switch (t.getTransactionType()) {
+		switch (t.getType()) {
 		case WITHDRAW:
 			TransactionWithdraw withdraw = (TransactionWithdraw) t;
 			return new WithdrawTransactionDTO(withdraw.getId(), withdraw.getAmount(), withdraw.getAccountId());

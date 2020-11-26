@@ -8,3 +8,10 @@ spring:
   redis:
     host: localhost
     port: 6379
+
+init:
+  fixture:
+    account:
+      enabled: true
+    transaction:
+      enabled: true

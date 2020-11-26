@@ -6,6 +6,10 @@ public class TransactionWithdraw extends AbstractTransaction {
 
 	private static final long serialVersionUID = 7239752053177850056L;
 
+	// Used by REDIS default serializer
+	public TransactionWithdraw() {
+	}
+
 	// Account is the source account ID
 	public TransactionWithdraw(String id, BigDecimal amount, String accountId) {
 		super(TransactionType.WITHDRAW, id, amount, accountId);

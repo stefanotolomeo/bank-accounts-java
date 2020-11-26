@@ -1,0 +1,9 @@
+[
+  {
+    "id": "3",
+    "amount": 1000,
+    "accountId": "1",
+    "toAccountId": "2",
+    "type": "TRANSFER"
+  }
+]
