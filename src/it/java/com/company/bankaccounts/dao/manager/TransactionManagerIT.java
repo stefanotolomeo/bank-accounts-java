@@ -79,8 +79,9 @@ class TransactionManagerIT extends BaseIT {
 	void findBy_Test() throws Exception {
 
 		// (1) Empty map
-		AbstractTransaction res_1 = transactionManager.findById(withdrawTransaction.getId());
-		Assertions.assertNull(res_1);
+		ItemNotFoundException e = Assertions
+				.assertThrows(ItemNotFoundException.class, () -> transactionManager.findById(withdrawTransaction.getId()));
+		Assertions.assertEquals("No Transaction found for ID=1", e.getMessage());
 
 		// (2) Add one Transaction (WITHDRAW), then check it
 		transactionHashOperations.put(Constants.CACHE_TRANSACTION_NAME, withdrawTransaction.getId(), withdrawTransaction);

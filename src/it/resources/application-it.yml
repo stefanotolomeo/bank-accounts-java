@@ -1,0 +1,6 @@
+init:
+  fixture:
+    account:
+      enabled: false
+    transaction:
+      enabled: false

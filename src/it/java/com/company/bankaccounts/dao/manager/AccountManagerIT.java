@@ -73,8 +73,8 @@ class AccountManagerIT extends BaseIT {
 	void findBy_Test() throws Exception {
 
 		// (1) Empty map
-		Account res_1 = accountManager.findById(a1.getId());
-		Assertions.assertNull(res_1);
+		ItemNotFoundException e = Assertions.assertThrows(ItemNotFoundException.class, () -> accountManager.findById(a1.getId()));
+		Assertions.assertEquals("No Account found for ID=1", e.getMessage());
 
 		// (2) Add one account, then check it
 		accountHashOperations.put(Constants.CACHE_ACCOUNT_NAME, a1.getId(), a1);
@@ -90,7 +90,7 @@ class AccountManagerIT extends BaseIT {
 
 		// (1) ID to be deleted not found
 		ItemNotFoundException e = Assertions.assertThrows(ItemNotFoundException.class, () -> accountManager.delete(a1.getId()));
-		Assertions.assertEquals("Cannot Delete: Account ID not found", e.getMessage());
+		Assertions.assertEquals("No Account found for ID=1", e.getMessage());
 
 		// (2) Add one Account, delete and then check it
 		accountHashOperations.put(Constants.CACHE_ACCOUNT_NAME, id_1, a1);
@@ -103,43 +103,11 @@ class AccountManagerIT extends BaseIT {
 	@Test
 	void update_Test() throws Exception {
 
-		// (1) Invalid Account: null
-		InvalidInputException e1 = Assertions.assertThrows(InvalidInputException.class, () -> accountManager.update(null));
-		Assertions.assertEquals("Invalid Account: Null Account", e1.getMessage());
+		// (1) Account ID to be deleted not found
+		ItemNotFoundException e = Assertions.assertThrows(ItemNotFoundException.class, () -> accountManager.update(a1));
+		Assertions.assertEquals("No Account found for ID=1", e.getMessage());
 
-		// (2) Invalid Account: null ID
-		Account invalidAccount = new Account(null, null, null, null, null);
-		InvalidInputException e2 = Assertions.assertThrows(InvalidInputException.class, () -> accountManager.update(invalidAccount));
-		Assertions.assertEquals("Invalid Account: Null ID", e2.getMessage());
-
-		// (3) Invalid Account: null name
-		invalidAccount.setId("1111");
-		InvalidInputException e3 = Assertions.assertThrows(InvalidInputException.class, () -> accountManager.update(invalidAccount));
-		Assertions.assertEquals("Invalid Account: Null Name", e3.getMessage());
-
-		// (3) Invalid Account: null surname
-		invalidAccount.setName("NAME");
-		InvalidInputException e4 = Assertions.assertThrows(InvalidInputException.class, () -> accountManager.update(invalidAccount));
-		Assertions.assertEquals("Invalid Account: Null Surname", e4.getMessage());
-
-		// (4) Invalid Account: null pin
-		invalidAccount.setSurname("SURNAME");
-		InvalidInputException e5 = Assertions.assertThrows(InvalidInputException.class, () -> accountManager.update(invalidAccount));
-		Assertions.assertEquals("Invalid Account: Null or Empty Pin", e5.getMessage());
-
-		// (5) Invalid Account: empty pin
-		invalidAccount.setPin("");
-		InvalidInputException e6 = Assertions.assertThrows(InvalidInputException.class, () -> accountManager.update(invalidAccount));
-		Assertions.assertEquals("Invalid Account: Null or Empty Pin", e6.getMessage());
-
-		// (6) Valid Account: no cares about amount (it is not considered for updates)
-		invalidAccount.setPin("12345");
-
-		// (7) Account ID to be deleted not found
-		ItemNotFoundException e7 = Assertions.assertThrows(ItemNotFoundException.class, () -> accountManager.update(a1));
-		Assertions.assertEquals("Cannot Update: Account ID not found", e7.getMessage());
-
-		// (8) Add one account, then check it
+		// (2) Add one account, then check it
 		accountHashOperations.put(Constants.CACHE_ACCOUNT_NAME, id_1, a1);
 		Account res_1 = accountManager.update(a1);
 		makeAssertionsOnAccounts(a1, res_1);
@@ -150,36 +118,7 @@ class AccountManagerIT extends BaseIT {
 	@Test
 	void save_Test() throws Exception {
 
-		// (1) Invalid Account: null
-		InvalidInputException e1 = Assertions.assertThrows(InvalidInputException.class, () -> accountManager.save(null));
-		Assertions.assertEquals("Invalid Account: Null Account", e1.getMessage());
-
-		// (2) Invalid Account: null name
-		Account invalidAccount = new Account(null, null, null, null, null);
-		InvalidInputException e2 = Assertions.assertThrows(InvalidInputException.class, () -> accountManager.save(invalidAccount));
-		Assertions.assertEquals("Invalid Account: Null Name", e2.getMessage());
-
-		// (3) Invalid Account: null surname
-		invalidAccount.setName("NAME");
-		InvalidInputException e3 = Assertions.assertThrows(InvalidInputException.class, () -> accountManager.save(invalidAccount));
-		Assertions.assertEquals("Invalid Account: Null Surname", e3.getMessage());
-
-		// (4) Invalid Account: null pin
-		invalidAccount.setSurname("SURNAME");
-		InvalidInputException e4 = Assertions.assertThrows(InvalidInputException.class, () -> accountManager.save(invalidAccount));
-		Assertions.assertEquals("Invalid Account: Null or Empty Pin", e4.getMessage());
-
-		// (5) Invalid Account: empty pin
-		invalidAccount.setPin("");
-		InvalidInputException e5 = Assertions.assertThrows(InvalidInputException.class, () -> accountManager.save(invalidAccount));
-		Assertions.assertEquals("Invalid Account: Null or Empty Pin", e5.getMessage());
-
-		// (6) Invalid Account: null amount
-		invalidAccount.setPin("12345");
-		InvalidInputException e6 = Assertions.assertThrows(InvalidInputException.class, () -> accountManager.save(invalidAccount));
-		Assertions.assertEquals("Invalid Account: Null Amount", e6.getMessage());
-
-		// (7) Valid Account: add a new Account
+		// (1) Valid Account: add a new Account
 		Account res_1 = accountManager.save(a1);
 		Assertions.assertNotNull(res_1);
 		makeAssertionsOnAccounts(a1, res_1);
