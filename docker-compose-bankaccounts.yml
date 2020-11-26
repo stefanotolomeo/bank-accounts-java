@@ -1,1 +1,18 @@
-// TODO
+version: '3.3'
+
+services:
+
+  redis:
+    image: redis
+    restart: always
+    container_name: my-redis
+    ports:
+      - 6379:6379
+    network_mode: "host"
+
+  bank-accounts:
+    container_name: bank-accounts
+    build: .
+    ports:
+      - 8080:8080
+    network_mode: "host"
