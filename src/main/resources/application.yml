@@ -12,6 +12,8 @@ spring:
 init:
   fixture:
     account:
+      path: /fixtures/accounts.json
       enabled: true
     transaction:
+      path: /fixtures/transaction_deposit.json
       enabled: true

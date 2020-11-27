@@ -15,7 +15,7 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +27,9 @@ public class TransactionManager extends AbstractManager implements IManager<Abst
 	@Value("${init.fixture.transaction.enabled}")
 	private boolean initWithFixtures;
 
+	@Value("${init.fixture.transaction.path}")
+	private String PATH_DEPOSIT;
+
 	@Autowired
 	private HashOperations<String, String, AbstractTransaction> hashOperations;
 
@@ -35,22 +38,18 @@ public class TransactionManager extends AbstractManager implements IManager<Abst
 
 	@PostConstruct
 	public void initialize() throws Exception {
-		this.CACHE_NAME = Constants.CACHE_TRANSACTION_NAME;
+		this.DATA_CACHE_NAME = Constants.CACHE_TRANSACTION_NAME;
+		this.INDEX_CACHE_NAME = Constants.INDEX_CACHE_TRANSACTION;
 
 		if (initWithFixtures) {
-
+			ObjectMapper mapper = new ObjectMapper();
 			List<AbstractTransaction> initTrans = new ArrayList<>();
+
 			// (1) Add Deposit transactions
-			initTrans.addAll(new ObjectMapper()
-					.readValue(new File("src/main/resources/fixtures/transaction_deposit.json"), new TypeReference<List<TransactionDeposit>>() {}));
-
-			// (2) Add Withdraw transactions
-			initTrans.addAll(new ObjectMapper()
-					.readValue(new File("src/main/resources/fixtures/transaction_withdraw.json"), new TypeReference<List<TransactionWithdraw>>() {}));
-
-			// (3) Add Transfer transactions
-			initTrans.addAll(new ObjectMapper()
-					.readValue(new File("src/main/resources/fixtures/transaction_transfer.json"), new TypeReference<List<TransactionTransfer>>() {}));
+			try (InputStream is = getClass().getResourceAsStream(PATH_DEPOSIT)) {
+				initTrans.addAll(mapper.readValue(is, new TypeReference<List<TransactionDeposit>>() {
+				}));
+			}
 
 			for (AbstractTransaction t : initTrans) {
 				this.save(t);
@@ -64,7 +63,7 @@ public class TransactionManager extends AbstractManager implements IManager<Abst
 
 		validateTransaction(item);
 
-		String nextTransactionId = String.valueOf(valueOperations.increment(Constants.INDEX_CACHE_ACCOUNT));
+		String nextTransactionId = String.valueOf(valueOperations.increment(INDEX_CACHE_NAME));
 		item.setId(nextTransactionId);
 
 		switch (item.getType()) {
@@ -126,7 +125,7 @@ public class TransactionManager extends AbstractManager implements IManager<Abst
 			throw new InvalidInputException("Invalid Input: Null or empty");
 		}
 
-		AbstractTransaction foundTrans = hashOperations.get(CACHE_NAME, id);
+		AbstractTransaction foundTrans = hashOperations.get(DATA_CACHE_NAME, id);
 		if (foundTrans == null) {
 			throw new ItemNotFoundException("No Transaction found for ID=" + id);
 		}
@@ -136,7 +135,7 @@ public class TransactionManager extends AbstractManager implements IManager<Abst
 
 	@Override
 	public Map<String, AbstractTransaction> findAll() {
-		return hashOperations.entries(CACHE_NAME);
+		return hashOperations.entries(DATA_CACHE_NAME);
 	}
 
 	@Override

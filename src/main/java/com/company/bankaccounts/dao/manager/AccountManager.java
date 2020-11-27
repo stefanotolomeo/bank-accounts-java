@@ -12,7 +12,7 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -22,18 +22,23 @@ public class AccountManager extends AbstractManager implements IManager<Account>
 	@Value("${init.fixture.account.enabled}")
 	private boolean initWithFixtures;
 
+	@Value("${init.fixture.account.path}")
+	private String PATH;
+
 	@Autowired
 	private HashOperations<String, String, Account> hashOperations;
 
 	@PostConstruct
 	public void initialize() throws Exception {
-		this.CACHE_NAME = Constants.CACHE_ACCOUNT_NAME;
+		this.DATA_CACHE_NAME = Constants.CACHE_ACCOUNT_NAME;
+		this.INDEX_CACHE_NAME = Constants.INDEX_CACHE_ACCOUNT;
 
 		if (initWithFixtures) {
-			List<Account> accountList = new ObjectMapper()
-					.readValue(new File("src/main/resources/fixtures/accounts.json"), new TypeReference<List<Account>>() {});
-			for (Account a : accountList) {
-				this.save(a);
+			try(InputStream is = getClass().getResourceAsStream(PATH)){
+				List<Account> accountList = new ObjectMapper().readValue(is, new TypeReference<List<Account>>() {});
+				for (Account a : accountList) {
+					this.save(a);
+				}
 			}
 		}
 	}
@@ -43,10 +48,10 @@ public class AccountManager extends AbstractManager implements IManager<Account>
 
 		// The Input Account has been previously validated
 
-		String nextId = String.valueOf(valueOperations.increment(Constants.INDEX_CACHE_ACCOUNT));
+		String nextId = String.valueOf(valueOperations.increment(INDEX_CACHE_NAME));
 		account.setId(nextId);
 
-		hashOperations.put(CACHE_NAME, nextId, account);
+		hashOperations.put(DATA_CACHE_NAME, nextId, account);
 		return findById(nextId);
 	}
 
@@ -64,7 +69,7 @@ public class AccountManager extends AbstractManager implements IManager<Account>
 		// Set the amount to the current one
 		account.setAmount(cachedAcc.getAmount());
 
-		hashOperations.put(CACHE_NAME, account.getId(), account);
+		hashOperations.put(DATA_CACHE_NAME, account.getId(), account);
 		log.info("Updated Account={}", account);
 
 		return account;
@@ -76,7 +81,7 @@ public class AccountManager extends AbstractManager implements IManager<Account>
 			throw new InvalidInputException("Invalid Input: Null or empty");
 		}
 
-		Account foundAcc = hashOperations.get(CACHE_NAME, id);
+		Account foundAcc = hashOperations.get(DATA_CACHE_NAME, id);
 		if (foundAcc == null) {
 			throw new ItemNotFoundException("No Account found for ID=" + id);
 		}
@@ -86,7 +91,7 @@ public class AccountManager extends AbstractManager implements IManager<Account>
 
 	@Override
 	public Map<String, Account> findAll() {
-		return hashOperations.entries(CACHE_NAME);
+		return hashOperations.entries(DATA_CACHE_NAME);
 	}
 
 	@Override
@@ -96,7 +101,7 @@ public class AccountManager extends AbstractManager implements IManager<Account>
 			throw new ItemNotFoundException("Cannot Delete: Account ID not found");
 		}
 
-		hashOperations.delete(CACHE_NAME, a.getId());
+		hashOperations.delete(DATA_CACHE_NAME, a.getId());
 
 		return a;
 	}
