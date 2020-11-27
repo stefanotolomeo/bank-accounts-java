@@ -23,9 +23,7 @@ public class TransactionValidator {
 
 		try {
 			Preconditions.checkNotNull(transDTO, "Null Transaction");
-			Preconditions.checkNotNull(transDTO.getAmount(), "Null Amount");
-			Preconditions.checkArgument(transDTO.getAmount().compareTo(BigDecimal.ZERO) > 0, "Not Positive Amount");
-			Preconditions.checkArgument(transDTO.getAccountId() != null && !transDTO.getAccountId().isEmpty(), "Null or Empty AccountID");
+			commonValidation(transDTO.getAmount(), transDTO.getPin(), transDTO.getAccountId());
 		} catch (Exception e) {
 			throw new InvalidInputException("Invalid Transaction: " + e.getMessage());
 		}
@@ -35,9 +33,7 @@ public class TransactionValidator {
 
 		try {
 			Preconditions.checkNotNull(transDTO, "Null Transaction");
-			Preconditions.checkNotNull(transDTO.getAmount(), "Null Amount");
-			Preconditions.checkArgument(transDTO.getAmount().compareTo(BigDecimal.ZERO) > 0, "Not Positive Amount");
-			Preconditions.checkArgument(transDTO.getAccountId() != null && !transDTO.getAccountId().isEmpty(), "Null or Empty AccountID");
+			commonValidation(transDTO.getAmount(), transDTO.getPin(), transDTO.getAccountId());
 		} catch (Exception e) {
 			throw new InvalidInputException("Invalid Transaction: " + e.getMessage());
 		}
@@ -47,10 +43,8 @@ public class TransactionValidator {
 
 		try {
 			Preconditions.checkNotNull(transDTO, "Null Transaction");
-			Preconditions.checkNotNull(transDTO.getAmount(), "Null Amount");
-			Preconditions.checkArgument(transDTO.getAmount().compareTo(BigDecimal.ZERO) > 0, "Not Positive Amount");
-			Preconditions.checkArgument(transDTO.getFromAccountId() != null && !transDTO.getFromAccountId().isEmpty(),
-					"Null or Empty From-AccountID");
+
+			commonValidation(transDTO.getAmount(), transDTO.getPin(), transDTO.getFromAccountId());
 			Preconditions
 					.checkArgument(transDTO.getToAccountId() != null && !transDTO.getToAccountId().isEmpty(), "Null or Empty To-AccountID");
 			Preconditions.checkArgument(!transDTO.getFromAccountId().equals(transDTO.getToAccountId()),
@@ -58,6 +52,14 @@ public class TransactionValidator {
 		} catch (Exception e) {
 			throw new InvalidInputException("Invalid Transaction: " + e.getMessage());
 		}
+	}
+
+	private void commonValidation(BigDecimal amount, String pin, String account){
+		Preconditions.checkNotNull(amount, "Null Amount");
+		Preconditions.checkArgument(amount.compareTo(BigDecimal.ZERO) > 0, "Not Positive Amount");
+		Preconditions.checkArgument(account != null && account.trim().length() != 0, "Null or Empty AccountID");
+		Preconditions.checkArgument(pin != null && pin.trim().length() != 0, "Null or Empty Pin");
+		// here no check on Pin size
 	}
 
 	public void checkPin(String accountId, String pin) throws Exception {

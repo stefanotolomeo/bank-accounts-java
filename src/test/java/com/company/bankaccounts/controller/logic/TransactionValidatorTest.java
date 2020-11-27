@@ -72,8 +72,16 @@ class TransactionValidatorTest extends BaseTest {
 		invalidTransaction.setAccountId("");
 		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null or Empty AccountID");
 
-		// (6) Valid Transaction: no exception here
+		// (6) Invalid Transaction: null Pin
 		invalidTransaction.setAccountId("123");
+		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null or Empty Pin");
+
+		// (7) Invalid Transaction: empty Pin
+		invalidTransaction.setPin("");
+		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null or Empty Pin");
+
+		// (8) Valid Transaction: no exception here
+		invalidTransaction.setPin("12345");	// here no check on Pin size
 		transactionValidator.validate(invalidTransaction);
 
 	}
@@ -102,8 +110,16 @@ class TransactionValidatorTest extends BaseTest {
 		invalidTransaction.setAccountId("");
 		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null or Empty AccountID");
 
-		// (6) Valid Transaction: no exception here
+		// (6) Invalid Transaction: null Pin
 		invalidTransaction.setAccountId("123");
+		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null or Empty Pin");
+
+		// (7) Invalid Transaction: empty Pin
+		invalidTransaction.setPin("");
+		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null or Empty Pin");
+
+		// (6) Valid Transaction: no exception here
+		invalidTransaction.setPin("12345"); // here no check on Pin size
 		transactionValidator.validate(invalidTransaction);
 
 	}
@@ -125,21 +141,29 @@ class TransactionValidatorTest extends BaseTest {
 
 		// (4) Invalid Transaction: null From-AccountID
 		invalidTransaction.setAmount(BigDecimal.TEN);
-		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null or Empty From-AccountID");
+		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null or Empty AccountID");
 
 		// (5) Invalid Transaction: empty From-AccountID
 		invalidTransaction.setFromAccountId("");
-		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null or Empty From-AccountID");
+		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null or Empty AccountID");
 
-		// (6) Invalid Transaction: null To-AccountID
+		// (6) Invalid Transaction: null Pin
 		invalidTransaction.setFromAccountId("123");
+		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null or Empty Pin");
+
+		// (7) Invalid Transaction: empty Pin
+		invalidTransaction.setPin("");
+		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null or Empty Pin");
+
+		// (8) Invalid Transaction: null To-AccountID
+		invalidTransaction.setPin("12345"); // here no check on Pin size
 		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null or Empty To-AccountID");
 
-		// (7) Invalid Transaction: empty To-AccountID
+		// (9) Invalid Transaction: empty To-AccountID
 		invalidTransaction.setToAccountId("");
 		validateAndAssertException(invalidTransaction, "Invalid Transaction: Null or Empty To-AccountID");
 
-		// (8) Valid Transaction: no exception here
+		// (10) Valid Transaction: no exception here
 		invalidTransaction.setToAccountId("456");
 		transactionValidator.validate(invalidTransaction);
 	}
