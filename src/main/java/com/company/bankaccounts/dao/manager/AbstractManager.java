@@ -9,10 +9,4 @@ abstract class AbstractManager {
 
 	final Logger log = LoggerFactory.getLogger(this.getClass());
 
-	String DATA_CACHE_NAME;
-	String INDEX_CACHE_NAME;
-
-	@Autowired
-	ValueOperations<String, Object> valueOperations;
-
 }

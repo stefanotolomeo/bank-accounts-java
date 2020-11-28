@@ -9,10 +9,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import javax.annotation.PostConstruct;
 import java.util.Set;
 
 @ContextConfiguration(classes = { ITContext.class, RedisConfig.class, DaoConfig.class })
@@ -22,10 +24,17 @@ import java.util.Set;
 public abstract class BaseIT {
 
 	@Autowired
+	protected RedisTemplate<String, Object> redisTemplate;
+
 	protected HashOperations<String, String, Account> accountHashOperations;
 
-	@Autowired
 	protected HashOperations<String, String, AbstractTransaction> transactionHashOperations;
+
+	@PostConstruct
+	public void initialize() {
+		accountHashOperations = redisTemplate.opsForHash();
+		transactionHashOperations = redisTemplate.opsForHash();
+	}
 
 	protected void clearAllCaches() {
 		// Clear ACCOUNT cache

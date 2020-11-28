@@ -1,6 +1,8 @@
 package com.company.bankaccounts.dao.manager;
 
 import com.company.bankaccounts.config.Constants;
+import com.company.bankaccounts.dao.client.AccountRepository;
+import com.company.bankaccounts.dao.client.IndexRepository;
 import com.company.bankaccounts.dao.model.Account;
 import com.company.bankaccounts.exceptions.InvalidInputException;
 import com.company.bankaccounts.exceptions.ItemNotFoundException;
@@ -8,15 +10,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-@Repository
+@Service
 public class AccountManager extends AbstractManager implements IManager<Account> {
 
 	@Value("${init.fixture.account.enabled}")
@@ -26,16 +27,17 @@ public class AccountManager extends AbstractManager implements IManager<Account>
 	private String PATH;
 
 	@Autowired
-	private HashOperations<String, String, Account> hashOperations;
+	private AccountRepository accountRepository;
+
+	@Autowired
+	private IndexRepository indexRepository;
 
 	@PostConstruct
 	public void initialize() throws Exception {
-		this.DATA_CACHE_NAME = Constants.CACHE_ACCOUNT_NAME;
-		this.INDEX_CACHE_NAME = Constants.INDEX_CACHE_ACCOUNT;
-
 		if (initWithFixtures) {
-			try(InputStream is = getClass().getResourceAsStream(PATH)){
-				List<Account> accountList = new ObjectMapper().readValue(is, new TypeReference<List<Account>>() {});
+			try (InputStream is = getClass().getResourceAsStream(PATH)) {
+				List<Account> accountList = new ObjectMapper().readValue(is, new TypeReference<List<Account>>() {
+				});
 				for (Account a : accountList) {
 					this.save(a);
 				}
@@ -48,10 +50,11 @@ public class AccountManager extends AbstractManager implements IManager<Account>
 
 		// The Input Account has been previously validated
 
-		String nextId = String.valueOf(valueOperations.increment(INDEX_CACHE_NAME));
+		String nextId = indexRepository.getNextIdForAccount();
 		account.setId(nextId);
 
-		hashOperations.put(DATA_CACHE_NAME, nextId, account);
+		accountRepository.save(account);
+
 		return findById(nextId);
 	}
 
@@ -69,7 +72,8 @@ public class AccountManager extends AbstractManager implements IManager<Account>
 		// Set the amount to the current one
 		account.setAmount(cachedAcc.getAmount());
 
-		hashOperations.put(DATA_CACHE_NAME, account.getId(), account);
+		accountRepository.update(account);
+
 		log.info("Updated Account={}", account);
 
 		return account;
@@ -81,7 +85,7 @@ public class AccountManager extends AbstractManager implements IManager<Account>
 			throw new InvalidInputException("Invalid Input: Null or empty");
 		}
 
-		Account foundAcc = hashOperations.get(DATA_CACHE_NAME, id);
+		Account foundAcc = accountRepository.getById(id);
 		if (foundAcc == null) {
 			throw new ItemNotFoundException("No Account found for ID=" + id);
 		}
@@ -91,7 +95,8 @@ public class AccountManager extends AbstractManager implements IManager<Account>
 
 	@Override
 	public Map<String, Account> findAll() {
-		return hashOperations.entries(DATA_CACHE_NAME);
+
+		return accountRepository.getAll();
 	}
 
 	@Override
@@ -101,7 +106,7 @@ public class AccountManager extends AbstractManager implements IManager<Account>
 			throw new ItemNotFoundException("Cannot Delete: Account ID not found");
 		}
 
-		hashOperations.delete(DATA_CACHE_NAME, a.getId());
+		accountRepository.delete(id);
 
 		return a;
 	}

@@ -1,10 +1,8 @@
 package com.company.bankaccounts.dao.manager;
 
 import com.company.bankaccounts.config.Constants;
-import com.company.bankaccounts.exceptions.InvalidInputException;
-import com.company.bankaccounts.exceptions.ItemNotFoundException;
 import com.company.bankaccounts.dao.model.Account;
-import com.company.bankaccounts.dao.model.OperationType;
+import com.company.bankaccounts.exceptions.ItemNotFoundException;
 import com.company.bankaccounts.itconfig.BaseIT;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
