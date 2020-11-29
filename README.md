@@ -176,6 +176,29 @@ In particular, there are two containers running in localhost (of course) and und
 4. The APIs are now exposed on port 8080. It is convenient to use the swagger at this URL: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
 5. Turn off the container: <code>docker-compose -f docker-compose-bankaccounts.yml down</code>
 
+### Initialization
+Everytime the application starts, the caches are populated with the following fixture data:
+1. Two accounts are added into Account-Cache
+2. Two Deposit transaction are added to the Transaction-Cache
+3. At the end of the initialization steps, this is the status for the two accounts:
+
+```json
+{
+  "1": {
+    "name": "Mark",
+    "surname": "Zuck",
+    "pin": "1111",
+    "amount": 1500
+  },
+  "2": {
+    "name": "John",
+    "surname": "Smith",
+    "pin": "2222",
+    "amount": 900
+  }
+}
+```
+
 ## Testing
 This project contains both Unit and Integration Tests.
  
