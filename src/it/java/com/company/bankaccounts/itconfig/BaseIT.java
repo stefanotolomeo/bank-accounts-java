@@ -1,12 +1,12 @@
 package com.company.bankaccounts.itconfig;
 
-import com.company.bankaccounts.config.Constants;
 import com.company.bankaccounts.config.DaoConfig;
 import com.company.bankaccounts.config.RedisConfig;
 import com.company.bankaccounts.dao.model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -23,6 +23,12 @@ import java.util.Set;
 @ActiveProfiles("it")
 public abstract class BaseIT {
 
+	@Value("${cache.account}")
+	protected String CACHE_ACCOUNT_NAME;
+
+	@Value("${cache.transaction}")
+	protected String CACHE_TRANSACTION_NAME;
+
 	@Autowired
 	protected RedisTemplate<String, Object> redisTemplate;
 
@@ -38,15 +44,15 @@ public abstract class BaseIT {
 
 	protected void clearAllCaches() {
 		// Clear ACCOUNT cache
-		Set<String> accountKeys = accountHashOperations.keys(Constants.CACHE_ACCOUNT_NAME);
+		Set<String> accountKeys = accountHashOperations.keys(CACHE_ACCOUNT_NAME);
 		for (String s : accountKeys) {
-			accountHashOperations.delete(Constants.CACHE_ACCOUNT_NAME, s);
+			accountHashOperations.delete(CACHE_ACCOUNT_NAME, s);
 		}
 
 		// Clear TRANSACTIONS cache
-		Set<String> transactionKeys = transactionHashOperations.keys(Constants.CACHE_TRANSACTION_NAME);
+		Set<String> transactionKeys = transactionHashOperations.keys(CACHE_TRANSACTION_NAME);
 		for (String s : transactionKeys) {
-			transactionHashOperations.delete(Constants.CACHE_TRANSACTION_NAME, s);
+			transactionHashOperations.delete(CACHE_TRANSACTION_NAME, s);
 		}
 	}
 

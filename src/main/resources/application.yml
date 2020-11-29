@@ -17,3 +17,10 @@ init:
     transaction:
       path: /fixtures/transaction_deposit.json
       enabled: true
+
+cache:
+  account: ACCOUNT
+  transaction: TRANSACTION
+  index:
+    account: INDEX_ACCOUNT
+    transaction: INDEX_TRANSACTION

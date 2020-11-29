@@ -1,11 +1,11 @@
 package com.company.bankaccounts.dao.client;
 
-import com.company.bankaccounts.config.Constants;
 import com.company.bankaccounts.dao.model.AbstractTransaction;
 import com.company.bankaccounts.dao.model.Account;
 import com.company.bankaccounts.dao.model.OperationType;
 import com.company.bankaccounts.exceptions.FailedCRUDException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisOperations;
@@ -20,7 +20,11 @@ import java.util.Map;
 @Repository
 public class TransactionRepository {
 
-	private String DATA_CACHE_NAME;
+	@Value("${cache.account}")
+	private String CACHE_ACCOUNT_NAME;
+
+	@Value("${cache.transaction}")
+	private String CACHE_TRANSACTION_NAME;
 
 	@Autowired
 	private RedisTemplate<String, Object> redisTemplate;
@@ -29,7 +33,6 @@ public class TransactionRepository {
 
 	@PostConstruct
 	public void initialize() {
-		this.DATA_CACHE_NAME = Constants.CACHE_TRANSACTION_NAME;
 		hashOperations = redisTemplate.opsForHash();
 	}
 
@@ -43,10 +46,10 @@ public class TransactionRepository {
 
 				// (2) Execute the operations:
 				// (2.1) Save the transaction
-				operations.opsForHash().put(Constants.CACHE_TRANSACTION_NAME, newTransaction.getId(), newTransaction);
+				operations.opsForHash().put(CACHE_TRANSACTION_NAME, newTransaction.getId(), newTransaction);
 				// (2.2) Decrease the amount from the involved accounts
 				for (Account a : updatedAccountList) {
-					operations.opsForHash().put(Constants.CACHE_ACCOUNT_NAME, a.getId(), a);
+					operations.opsForHash().put(CACHE_ACCOUNT_NAME, a.getId(), a);
 				}
 
 				// (3) Execute operations
@@ -61,10 +64,10 @@ public class TransactionRepository {
 	}
 
 	public AbstractTransaction getById(String id) {
-		return hashOperations.get(DATA_CACHE_NAME, id);
+		return hashOperations.get(CACHE_TRANSACTION_NAME, id);
 	}
 
 	public Map<String, AbstractTransaction> getAll() {
-		return hashOperations.entries(DATA_CACHE_NAME);
+		return hashOperations.entries(CACHE_TRANSACTION_NAME);
 	}
 }

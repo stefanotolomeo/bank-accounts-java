@@ -1,6 +1,5 @@
 package com.company.bankaccounts.dao.manager;
 
-import com.company.bankaccounts.config.Constants;
 import com.company.bankaccounts.dao.client.AccountRepository;
 import com.company.bankaccounts.dao.client.IndexRepository;
 import com.company.bankaccounts.dao.model.Account;

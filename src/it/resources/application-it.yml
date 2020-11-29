@@ -4,3 +4,11 @@ init:
       enabled: false
     transaction:
       enabled: false
+
+
+cache:
+  account: ACCOUNT
+  transaction: TRANSACTION
+  index:
+    account: INDEX_ACCOUNT
+    transaction: INDEX_TRANSACTION

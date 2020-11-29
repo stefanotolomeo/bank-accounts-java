@@ -1,6 +1,5 @@
 package com.company.bankaccounts.dao.manager;
 
-import com.company.bankaccounts.config.Constants;
 import com.company.bankaccounts.dao.model.Account;
 import com.company.bankaccounts.exceptions.ItemNotFoundException;
 import com.company.bankaccounts.itconfig.BaseIT;
@@ -51,14 +50,14 @@ class AccountManagerIT extends BaseIT {
 		Assertions.assertTrue(res_1.isEmpty());
 
 		// (2) Add one account, then check it
-		accountHashOperations.put(Constants.CACHE_ACCOUNT_NAME, a1.getId(), a1);
+		accountHashOperations.put(CACHE_ACCOUNT_NAME, a1.getId(), a1);
 		Map<String, Account> res_2 = accountManager.findAll();
 		Assertions.assertNotNull(res_2);
 		Assertions.assertFalse(res_2.isEmpty());
 		makeAssertionsOnAccounts(a1, res_2.get(a1.getId()));
 
 		// (3) Add the second Account, then check it
-		accountHashOperations.put(Constants.CACHE_ACCOUNT_NAME, a2.getId(), a2);
+		accountHashOperations.put(CACHE_ACCOUNT_NAME, a2.getId(), a2);
 		Map<String, Account> res_3 = accountManager.findAll();
 		Assertions.assertNotNull(res_3);
 		Assertions.assertEquals(2, res_3.size());
@@ -75,7 +74,7 @@ class AccountManagerIT extends BaseIT {
 		Assertions.assertEquals("No Account found for ID=1", e.getMessage());
 
 		// (2) Add one account, then check it
-		accountHashOperations.put(Constants.CACHE_ACCOUNT_NAME, a1.getId(), a1);
+		accountHashOperations.put(CACHE_ACCOUNT_NAME, a1.getId(), a1);
 		Account res_2 = accountManager.findById(a1.getId());
 		Assertions.assertNotNull(res_2);
 		makeAssertionsOnAccounts(a1, res_2);
@@ -91,7 +90,7 @@ class AccountManagerIT extends BaseIT {
 		Assertions.assertEquals("No Account found for ID=1", e.getMessage());
 
 		// (2) Add one Account, delete and then check it
-		accountHashOperations.put(Constants.CACHE_ACCOUNT_NAME, id_1, a1);
+		accountHashOperations.put(CACHE_ACCOUNT_NAME, id_1, a1);
 		Account res_1 = accountManager.delete(a1.getId());
 		makeAssertionsOnAccounts(a1, res_1);
 
@@ -106,7 +105,7 @@ class AccountManagerIT extends BaseIT {
 		Assertions.assertEquals("No Account found for ID=1", e.getMessage());
 
 		// (2) Add one account, then check it
-		accountHashOperations.put(Constants.CACHE_ACCOUNT_NAME, id_1, a1);
+		accountHashOperations.put(CACHE_ACCOUNT_NAME, id_1, a1);
 		Account res_1 = accountManager.update(a1);
 		makeAssertionsOnAccounts(a1, res_1);
 

@@ -1,6 +1,5 @@
 package com.company.bankaccounts.dao.manager;
 
-import com.company.bankaccounts.config.Constants;
 import com.company.bankaccounts.dao.model.*;
 import com.company.bankaccounts.exceptions.FailedCRUDException;
 import com.company.bankaccounts.exceptions.InsufficientAmountException;
@@ -59,14 +58,14 @@ class TransactionManagerIT extends BaseIT {
 		Assertions.assertTrue(res_1.isEmpty());
 
 		// (2) Add one Transaction (WITHDRAW), then check it
-		transactionHashOperations.put(Constants.CACHE_TRANSACTION_NAME, withdrawTransaction.getId(), withdrawTransaction);
+		transactionHashOperations.put(CACHE_TRANSACTION_NAME, withdrawTransaction.getId(), withdrawTransaction);
 		Map<String, AbstractTransaction> res_2 = transactionManager.findAll();
 		Assertions.assertNotNull(res_2);
 		Assertions.assertFalse(res_2.isEmpty());
 		makeAssertionsOnTransactions(withdrawTransaction, res_2.get(withdrawTransaction.getId()));
 
 		// (3) Add the second Transaction (DEPOSIT), then check it
-		transactionHashOperations.put(Constants.CACHE_TRANSACTION_NAME, depositTransaction.getId(), depositTransaction);
+		transactionHashOperations.put(CACHE_TRANSACTION_NAME, depositTransaction.getId(), depositTransaction);
 		Map<String, AbstractTransaction> res_3 = transactionManager.findAll();
 		Assertions.assertNotNull(res_3);
 		Assertions.assertEquals(2, res_3.size());
@@ -84,7 +83,7 @@ class TransactionManagerIT extends BaseIT {
 		Assertions.assertEquals("No Transaction found for ID=1", e.getMessage());
 
 		// (2) Add one Transaction (WITHDRAW), then check it
-		transactionHashOperations.put(Constants.CACHE_TRANSACTION_NAME, withdrawTransaction.getId(), withdrawTransaction);
+		transactionHashOperations.put(CACHE_TRANSACTION_NAME, withdrawTransaction.getId(), withdrawTransaction);
 		AbstractTransaction res_2 = transactionManager.findById(withdrawTransaction.getId());
 		Assertions.assertNotNull(res_2);
 		makeAssertionsOnTransactions(withdrawTransaction, res_2);
